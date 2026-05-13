@@ -235,10 +235,17 @@ input {
 }
 
 .stat-card strong {
+  max-width: 100%;
   margin-top: 8px;
   color: var(--ink-900);
   font-size: 1.65rem;
   line-height: 1.1;
+  overflow-wrap: normal;
+  white-space: nowrap;
+}
+
+.stat-card strong.is-compact {
+  font-size: clamp(1.18rem, 1.35vw, 1.38rem);
 }
 
 .stat-card small {

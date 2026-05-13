@@ -964,10 +964,13 @@
   }
 
   function statCard(label, value, detail) {
+    const valueText = typeof value === "number" ? formatNumber(value) : String(value);
+    const compactClass = valueText.length > 12 ? ' class="is-compact"' : "";
+
     return `
       <article class="stat-card">
         <span>${escapeHtml(label)}</span>
-        <strong>${typeof value === "number" ? formatNumber(value) : escapeHtml(value)}</strong>
+        <strong${compactClass}>${escapeHtml(valueText)}</strong>
         <small>${escapeHtml(detail || "")}</small>
       </article>
     `;
