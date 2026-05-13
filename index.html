@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Gestão de TI Santa Casa</title>
+    <link rel="icon" type="image/png" href="logo-santa-casa.png">
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <header class="app-header">
+      <a class="brand" href="#inventario" aria-label="Santa Casa - Gestão de TI">
+        <img src="logo-santa-casa2.png" alt="Santa Casa">
+      </a>
+      <nav class="main-nav" aria-label="Navegação principal">
+        <button class="nav-button is-active" type="button" data-view="inventory">Inventário</button>
+        <button class="nav-button" type="button" data-view="builder">Montagem</button>
+        <button class="nav-button" type="button" data-view="audit">Auditoria</button>
+      </nav>
+    </header>
+
+    <main id="app" class="app-shell" tabindex="-1"></main>
+
+    <noscript>
+      <section class="noscript">
+        Este aplicativo precisa de JavaScript habilitado para carregar os dados da planilha.
+      </section>
+    </noscript>
+
+    <script src="data/inventory.js"></script>
+    <script src="data/catalog.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>
