@@ -2,7 +2,7 @@
   "use strict";
 
   const inventory = window.SCMJF_INVENTORY;
-  const catalog = window.SCMJF_PARTS_CATALOG;
+  let catalog = window.SCMJF_PARTS_CATALOG;
   const app = document.querySelector("#app");
 
   if (!inventory || !catalog) {
@@ -11,9 +11,9 @@
   }
 
   const rows = inventory.sheets.Inventario_Classificado || [];
-  const categories = catalog.categories || [];
-  const categoryById = Object.fromEntries(categories.map((category) => [category.id, category]));
-  const profiles = catalog.profiles || [];
+  let categories = [];
+  let categoryById = {};
+  let profiles = [];
   const currency = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" });
   const integer = new Intl.NumberFormat("pt-BR", { maximumFractionDigits: 0 });
   const decimal = new Intl.NumberFormat("pt-BR", { maximumFractionDigits: 1 });
@@ -44,6 +44,11 @@
 
   const state = {
     view: "inventory",
+    catalogStatus: {
+      loading: false,
+      dynamic: false,
+      message: ""
+    },
     page: 1,
     pageSize: 28,
     minimumProfile: "operational",
@@ -71,13 +76,49 @@
     }
   };
 
+  setCatalog(catalog);
   applyBuildProfile("base");
+  loadDynamicCatalog();
 
   document.addEventListener("click", handleClick);
   document.addEventListener("change", handleChange);
   document.addEventListener("input", handleInput);
 
   render();
+
+  function setCatalog(nextCatalog) {
+    catalog = nextCatalog;
+    categories = catalog.categories || [];
+    categoryById = Object.fromEntries(categories.map((category) => [category.id, category]));
+    profiles = catalog.profiles || [];
+  }
+
+  async function loadDynamicCatalog(refresh = false) {
+    if (!window.location || window.location.protocol === "file:") {
+      state.catalogStatus = {
+        loading: false,
+        dynamic: false,
+        message: "Abra pelo servidor local para carregar preços dinâmicos."
+      };
+      return;
+    }
+
+    state.catalogStatus = { loading: true, dynamic: false, message: "Carregando preços atuais..." };
+    if (state.view === "builder") renderBuilderView();
+
+    try {
+      const response = await fetch(`/api/catalog${refresh ? "?refresh=1" : ""}`);
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      const dynamicCatalog = await response.json();
+      setCatalog(dynamicCatalog);
+      applyBuildProfile(state.build.profile);
+      state.catalogStatus = { loading: false, dynamic: true, message: `Preços atualizados em ${formatDateTime(dynamicCatalog.metadata.generatedAt)}` };
+      render();
+    } catch (error) {
+      state.catalogStatus = { loading: false, dynamic: false, message: `Falha ao carregar preços dinâmicos: ${error.message}` };
+      if (state.view === "builder") renderBuilderView();
+    }
+  }
 
   function handleClick(event) {
     const navButton = event.target.closest("[data-view]");
@@ -105,6 +146,11 @@
 
     if (event.target.closest("[data-export-budget]")) {
       exportBudgetCsv();
+      return;
+    }
+
+    if (event.target.closest("[data-refresh-catalog]")) {
+      loadDynamicCatalog(true);
     }
   }
 
@@ -165,6 +211,7 @@
       const categoryId = target.dataset.partSelect;
       state.build.selections[categoryId] = target.value;
       delete state.build.priceOverrides[categoryId];
+      reconcileCompatibleSelections(categoryId);
       renderCatalogRows();
       renderBuildSummary();
       return;
@@ -437,6 +484,8 @@
             <h1>Peças, preços e custo por lote</h1>
           </div>
           <div class="heading-actions">
+            <span class="catalog-status">${escapeHtml(state.catalogStatus.message || "")}</span>
+            <button class="button button-muted" type="button" data-refresh-catalog ${state.catalogStatus.loading ? "disabled" : ""}>Atualizar preços</button>
             <button class="button button-primary" type="button" data-export-budget>Exportar orçamento</button>
           </div>
         </div>
@@ -478,10 +527,6 @@
                 <input id="laborPerUnit" type="number" min="0" step="10" value="${state.build.laborPerUnit}">
               </label>
             </div>
-            <div class="digest">
-              <strong>Referência da planilha:</strong>
-              <span>${formatCurrency(inventory.metadata.estimatedUnitCost)} por computador</span>
-            </div>
           </aside>
 
           <section class="results-panel">
@@ -520,8 +565,6 @@
     const contingencyValue = subtotal * (state.build.contingency / 100);
     const unitTotal = subtotal + contingencyValue + state.build.laborPerUnit;
     const projectTotal = unitTotal * quantity;
-    const spreadsheetUnit = Number(inventory.metadata.estimatedUnitCost || 0);
-    const delta = subtotal - spreadsheetUnit;
 
     container.innerHTML = `
       <div class="summary-grid">
@@ -529,11 +572,6 @@
         ${statCard("Custo unitário", formatCurrency(unitTotal), `${state.build.contingency}% contingência + ${formatCurrency(state.build.laborPerUnit)} serviço`)}
         ${statCard("Quantidade", quantity, quantityLabel())}
         ${statCard("Total do lote", formatCurrency(projectTotal), "Estimativa para planejamento")}
-      </div>
-      <div class="comparison-strip ${delta > 0 ? "is-higher" : "is-lower"}">
-        <span>Comparação com a planilha</span>
-        <strong>${delta >= 0 ? "+" : ""}${formatCurrency(delta)}</strong>
-        <span>por unidade antes de contingência e serviço</span>
       </div>
     `;
   }
@@ -598,7 +636,6 @@
           `;
         }).join("")}
       </div>
-      <div class="catalog-note">${escapeHtml(catalog.metadata.note)}</div>
     `;
   }
 
@@ -630,10 +667,12 @@
       if (!(category.id in state.build.included)) {
         state.build.included[category.id] = Boolean(category.required);
       }
-      if (!state.build.selections[category.id]) {
+      if (!state.build.selections[category.id] || !category.items.some((item) => item.id === state.build.selections[category.id])) {
         state.build.selections[category.id] = category.defaultItem || category.items[0]?.id;
       }
     });
+    reconcileCompatibleSelections("cpu");
+    reconcileCompatibleSelections("motherboard");
   }
 
   function currentBuildProfile() {
@@ -806,8 +845,53 @@
   function getSelectedItem(categoryId) {
     const category = categoryById[categoryId];
     if (!category) return null;
+    const items = getAvailableItemsForCategory(category);
     const selectedId = state.build.selections[categoryId] || category.defaultItem || category.items[0]?.id;
-    return category.items.find((item) => item.id === selectedId) || category.items[0] || null;
+    return items.find((item) => item.id === selectedId) || items[0] || null;
+  }
+
+  function getAvailableItemsForCategory(category) {
+    const items = category.items || [];
+    if (category.id === "motherboard") {
+      const cpuSocket = getSelectedItem("cpu")?.compatibility?.socket;
+      if (!cpuSocket) return items;
+      return items.filter((item) => item.compatibility?.socket === cpuSocket);
+    }
+
+    if (category.id === "memory") {
+      const memoryType = getSelectedItem("motherboard")?.compatibility?.memoryType;
+      if (!memoryType) return items;
+      return items.filter((item) => item.compatibility?.memoryType === memoryType);
+    }
+
+    if (category.id === "cooler") {
+      const cpuSocket = getSelectedItem("cpu")?.compatibility?.socket;
+      if (!cpuSocket) return items;
+      return items.filter((item) => {
+        const sockets = item.compatibility?.sockets || [];
+        return sockets.length === 0 || sockets.includes(cpuSocket);
+      });
+    }
+
+    return items;
+  }
+
+  function reconcileCompatibleSelections(changedCategoryId) {
+    const impacted = changedCategoryId === "cpu"
+      ? ["motherboard", "memory", "cooler"]
+      : changedCategoryId === "motherboard"
+        ? ["memory"]
+        : [];
+
+    impacted.forEach((categoryId) => {
+      const category = categoryById[categoryId];
+      if (!category) return;
+      const items = getAvailableItemsForCategory(category);
+      if (!items.some((item) => item.id === state.build.selections[categoryId])) {
+        state.build.selections[categoryId] = items[0]?.id || null;
+        delete state.build.priceOverrides[categoryId];
+      }
+    });
   }
 
   function getAllowedOffers(item) {
@@ -853,6 +937,7 @@
   }
 
   function catalogRow(category) {
+    const availableItems = getAvailableItemsForCategory(category);
     const selected = getSelectedItem(category.id);
     const included = isCategoryIncluded(category);
     const price = getSelectedPrice(category.id);
@@ -870,9 +955,8 @@
         </td>
         <td>
           <select data-part-select="${category.id}">
-            ${category.items.map((item) => `<option value="${item.id}" ${item.id === selected?.id ? "selected" : ""}>${escapeHtml(item.name)}</option>`).join("")}
+            ${availableItems.map((item) => `<option value="${item.id}" ${item.id === selected?.id ? "selected" : ""}>${escapeHtml(item.name)}</option>`).join("")}
           </select>
-          <small>${escapeHtml(selected?.notes || "")}</small>
         </td>
         <td>
           <input class="price-input" type="number" min="0" step="0.01" data-price-override="${category.id}" value="${price}">
@@ -1087,6 +1171,14 @@
   function numberFromInput(value, fallback) {
     const number = Number(String(value).replace(",", "."));
     return Number.isFinite(number) ? number : fallback;
+  }
+
+  function formatDateTime(value) {
+    if (!value) return "-";
+    return new Intl.DateTimeFormat("pt-BR", {
+      dateStyle: "short",
+      timeStyle: "short"
+    }).format(new Date(value));
   }
 
   function formatCurrency(value) {

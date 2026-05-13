@@ -1,10 +1,16 @@
 # Gestão de TI Santa Casa
 
-Aplicativo web estático para análise da planilha `triagem_troca_computadores_santa_casa.xlsx`.
+Aplicativo web para análise da planilha `triagem_troca_computadores_santa_casa.xlsx` e consulta dinâmica de peças.
 
 ## Como abrir
 
-Abra `index.html` no navegador. O app não usa dependências externas nem servidor.
+Execute o servidor local e abra `http://localhost:4173`.
+
+```powershell
+npm start
+```
+
+O servidor expõe `/api/catalog` para buscar preços atuais na KaBuM! e Magazine Luiza e alimentar a página de montagem.
 
 ## O que tem no app
 
@@ -17,7 +23,7 @@ Abra `index.html` no navegador. O app não usa dependências externas nem servid
 ## Dados
 
 - `data/inventory.js` é gerado a partir da planilha.
-- `data/catalog.js` contém o catálogo de peças com preços públicos consultados em 13/05/2026, somente para fornecedores permitidos.
+- `data/catalog.js` contém apenas o fallback inicial. A página de montagem carrega dados dinâmicos pelo servidor.
 - `scripts/Export-InventoryData.ps1` refaz a exportação do XLSX.
 - `scripts/smoke-test.js` valida se a aplicação renderiza os dados principais.
 
@@ -26,6 +32,7 @@ Abra `index.html` no navegador. O app não usa dependências externas nem servid
 ```powershell
 powershell -ExecutionPolicy Bypass -File .\scripts\Export-InventoryData.ps1
 node .\scripts\smoke-test.js
+npm start
 ```
 
 ## Fontes de preços

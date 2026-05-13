@@ -3,7 +3,6 @@ window.SCMJF_PARTS_CATALOG = {
     "currency": "BRL",
     "collectedAt": "2026-05-13",
     "title": "Catalogo publico de pecas por fornecedores permitidos",
-    "note": "Somente fornecedores permitidos pela Santa Casa: KaBuM! e Magazine Luiza. Quando nao houver preco publico/estoque visivel nesses dois fornecedores, o app marca como sem preco publico encontrado.",
     "allowedSuppliers": [
       {
         "id": "kabum",
