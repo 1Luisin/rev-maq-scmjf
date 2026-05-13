@@ -101,12 +101,17 @@ if (!elements.get("#catalogRows").innerHTML.includes("Processador")) {
   throw new Error("Parts catalog was not rendered.");
 }
 
-if (!elements.get("#catalogRows").innerHTML.includes("Datafor")) {
+if (!elements.get("#catalogRows").innerHTML.includes("KaBuM!")) {
   throw new Error("Allowed supplier offers were not rendered.");
 }
 
-if (!elements.get("#supplierCoverage").innerHTML.includes("VMPack")) {
+if (!elements.get("#supplierCoverage").innerHTML.includes("Magazine Luiza")) {
   throw new Error("Supplier whitelist coverage was not rendered.");
+}
+
+const removedSupplier = ["Data", "for"].join("");
+if (elements.get("#supplierCoverage").innerHTML.includes(removedSupplier)) {
+  throw new Error("Supplier whitelist contains a removed supplier.");
 }
 
 console.log("Smoke test passed");

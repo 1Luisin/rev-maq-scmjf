@@ -30,4 +30,4 @@ node .\scripts\smoke-test.js
 
 ## Fontes de preços
 
-Os preços são estimativas editáveis, com links diretos no catálogo. A lista de fornecedores permitidos está limitada a: Datafor, VMPack, KaBuM!, Magazine Luiza, Hardsoft, Shopshipe e Matchpoint. Quando um fornecedor não possui catálogo público ou estoque/preço visível, o app marca como sem preço público encontrado. Antes de compra, validar disponibilidade, frete, garantia, nota fiscal, modelo de licenciamento e compatibilidade entre processador, placa-mãe e memória.
+Os preços são estimativas editáveis, com links diretos no catálogo. A lista de fornecedores permitidos está limitada a: KaBuM! e Magazine Luiza. Quando esses fornecedores não possuem estoque/preço visível para uma peça, o app marca como sem preço público encontrado. Antes de compra, validar disponibilidade, frete, garantia, nota fiscal, modelo de licenciamento e compatibilidade entre processador, placa-mãe e memória.
