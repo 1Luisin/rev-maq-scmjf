@@ -2,48 +2,55 @@ window.SCMJF_PARTS_CATALOG = {
   metadata: {
     currency: "BRL",
     collectedAt: "2026-05-13",
-    title: "Catálogo público de peças para estimativa",
-    note: "Valores consultados em páginas públicas e mantidos como estimativa editável. Antes de comprar, validar fornecedor, garantia, frete, nota fiscal e compatibilidade."
+    title: "Catálogo público de peças por fornecedores permitidos",
+    note: "Somente fornecedores permitidos pela Santa Casa: datafor, vmpack, kabum, magazine luiza, hardsoft, shopshipe e matchpoint. Quando não houver preço público/estoque visível, o app marca como sem preço público encontrado.",
+    allowedSuppliers: [
+      { id: "datafor", label: "Datafor", url: "https://www.datafor.com.br/", searchUrl: "https://www.google.com/search?q=site%3Adatafor.com.br+{query}" },
+      { id: "vmpack", label: "VMPack", url: "", searchUrl: "https://www.google.com/search?q=%22vmpack%22+{query}" },
+      { id: "kabum", label: "KaBuM!", url: "https://www.kabum.com.br/", searchUrl: "https://www.kabum.com.br/busca/{query}" },
+      { id: "magalu", label: "Magazine Luiza", url: "https://www.magazineluiza.com.br/", searchUrl: "https://www.magazineluiza.com.br/busca/{query}/" },
+      { id: "hardsoft", label: "Hardsoft", url: "https://www.hardsoftnet.com.br/", searchUrl: "https://www.hardsoftnet.com.br/index.php?route=product/search&search={query}" },
+      { id: "shopshipe", label: "Shopshipe", url: "", searchUrl: "https://www.google.com/search?q=%22shopshipe%22+{query}" },
+      { id: "matchpoint", label: "Matchpoint", url: "", searchUrl: "https://www.google.com/search?q=%22matchpoint%22+{query}" }
+    ],
+    unavailableSuppliers: [
+      "vmpack: não foi localizado catálogo público de informática/preços.",
+      "shopshipe: não foi localizado catálogo público com esse nome exato.",
+      "matchpoint: foram localizadas referências de empresa de TI, mas não catálogo público de peças/preços."
+    ]
   },
   categories: [
     {
       id: "cpu",
       label: "Processador",
       required: true,
-      defaultItem: "cpu-i5-12400",
-      search: "processador desktop com vídeo integrado i5 Ryzen 5",
+      defaultItem: "cpu-i5-10400",
+      search: "processador desktop Intel Core i5 Ryzen 5",
       items: [
         {
-          id: "cpu-i5-12400",
-          name: "Intel Core i5-12400, 6c/12t, vídeo integrado",
-          price: 939,
-          source: "Promotech / lojas listadas",
-          url: "https://promotech.app.br/products/simple/cpu/model/core-i5-12400",
-          notes: "Opção LGA1700 com vídeo integrado para estações administrativas."
+          id: "cpu-i5-10400",
+          name: "Intel Core i5-10400, LGA1200, vídeo integrado",
+          notes: "Opção com vídeo integrado e disponibilidade pública em Datafor e KaBuM.",
+          offers: [
+            offer("datafor", "Processador Intel Core i5-10400", 1369, "Imediata", "https://www.datafor.com.br/informatica/componentes/processadores/processador-intel-core-i5-10400-2-9ghz-4-3ghz-max-turbo-cache-12mb-lga-1200-bx8070110400", "R$ 1.300,55 à vista"),
+            offer("kabum", "Processador Intel Core i5-10400", 899.99, "Em estoque", "https://www.kabum.com.br/produto/112990", "Vendido e entregue por KaBuM!")
+          ]
         },
         {
-          id: "cpu-ryzen-5600g",
-          name: "AMD Ryzen 5 5600G, 6c/12t, vídeo integrado",
-          price: 1167.3,
-          source: "Hardware Barato / Magazine Luiza",
-          url: "https://www.hardwarebarato.com/produtos/processadores/ryzen-5-5600g",
-          notes: "AM4 com vídeo integrado; exige placa-mãe compatível."
-        },
-        {
-          id: "cpu-i5-13400",
-          name: "Intel Core i5-13400, 10c/16t, vídeo integrado",
-          price: 1342.64,
-          source: "Promotech / lojas listadas",
-          url: "https://promotech.app.br/products/simple/cpu/model/core-i5-13400",
-          notes: "Mais folga para multitarefa, MV, navegador e Office."
+          id: "cpu-i3-10100f",
+          name: "Intel Core i3-10100F, LGA1200, sem vídeo",
+          notes: "Exige placa de vídeo dedicada.",
+          offers: [
+            offer("datafor", "Processador Intel Core i3-10100F", 689, "Imediata", "https://www.datafor.com.br/informatica/componentes/processador-intel-core-i3-10100-3-6ghz-6mb-cache-bx8070110100", "R$ 654,55 à vista")
+          ]
         },
         {
           id: "cpu-ryzen-8500g",
-          name: "AMD Ryzen 5 8500G, 6c/12t, AM5, vídeo integrado",
-          price: 769.99,
-          source: "KaBuM!",
-          url: "https://www.kabum.com.br/produto/520366/processador-amd-ryzen-5-8500g-3-5-ghz-5-0ghz-max-turbo-cache-22mb-6-nucleos-12-threads-am5-video-integrado-100-100000931box",
-          notes: "Plataforma AM5; usar com placa A620/B650 e DDR5."
+          name: "AMD Ryzen 5 8500G, AM5, vídeo integrado",
+          notes: "Plataforma AM5 com DDR5.",
+          offers: [
+            offer("kabum", "AMD Ryzen 5 8500G", 769.99, "Em estoque", "https://www.kabum.com.br/produto/520366/processador-amd-ryzen-5-8500g-3-5-ghz-5-0ghz-max-turbo-cache-22mb-6-nucleos-12-threads-am5-video-integrado-100-100000931box")
+          ]
         }
       ]
     },
@@ -51,32 +58,32 @@ window.SCMJF_PARTS_CATALOG = {
       id: "motherboard",
       label: "Placa-mãe",
       required: true,
-      defaultItem: "mb-h610-ddr4",
-      search: "placa mãe H610 DDR4 A620 DDR5",
+      defaultItem: "mb-h610-msi",
+      search: "placa mãe H610 DDR4 AM5 DDR5",
       items: [
         {
-          id: "mb-h610-ddr4",
-          name: "H610 LGA1700 DDR4 mATX, M.2, HDMI",
-          price: 529.9,
-          source: "KaBuM!",
-          url: "https://www.kabum.com.br/produto/1012201/placa-mae-h610-revenger-lga-1700-",
-          notes: "Compatível com Intel 12a/13a/14a geração, DDR4."
+          id: "mb-h610-msi",
+          name: "MSI PRO H610M-S, LGA1700, DDR4, mATX",
+          notes: "Placa H610 DDR4 para Intel 12a/13a/14a geração.",
+          offers: [
+            offer("kabum", "MSI PRO H610M-S DDR4", 479.99, "Em estoque", "https://www.kabum.com.br/produto/873598/placa-mae-msi-pro-h610m-s-intel-core-ddr4-matx-realtek-alc897-codec-proh610msd4")
+          ]
         },
         {
-          id: "mb-h610-ntc",
-          name: "NTC H610M LGA1700 DDR4 mATX",
-          price: 689.83,
-          source: "KaBuM!",
-          url: "https://www.kabum.com.br/produto/699608/placa-mae-ntc-h610m-lga-1700-2xddr4-chipset-h610-matx",
-          notes: "Alternativa H610 com M.2 e saídas de vídeo."
+          id: "mb-h610-gigabyte",
+          name: "Gigabyte H610M K DDR4, LGA1700, mATX",
+          notes: "Alternativa H610 DDR4 com M.2.",
+          offers: [
+            offer("kabum", "Gigabyte H610M K DDR4", 509.99, "Em estoque", "https://www.kabum.com.br/produto/636798/placa-mae-gigabyte-h610m-k-ddr4-intel-lga-1700-micro-atx-ddr4-hdmi-m-2-9mh610mk-00-20")
+          ]
         },
         {
-          id: "mb-a620-ddr5",
-          name: "ASUS PRIME A620M-E AM5 DDR5 mATX",
-          price: 699.9,
-          source: "KaBuM!",
-          url: "https://www.kabum.com.br/produto/521066/",
-          notes: "Compatível com Ryzen AM5 e memória DDR5."
+          id: "mb-a620-asus",
+          name: "ASUS PRIME A620M-E, AM5, DDR5, mATX",
+          notes: "Para Ryzen AM5 e memória DDR5.",
+          offers: [
+            offer("kabum", "ASUS PRIME A620M-E AM5 DDR5", 699.9, "Em estoque", "https://www.kabum.com.br/produto/521066/")
+          ]
         }
       ]
     },
@@ -84,73 +91,102 @@ window.SCMJF_PARTS_CATALOG = {
       id: "memory",
       label: "Memória RAM",
       required: true,
-      defaultItem: "ram-ddr4-16-lexar",
-      search: "memória RAM 16GB DDR4 3200 desktop",
+      defaultItem: "ram-ddr4-16",
+      search: "memória RAM desktop DDR4 16GB 3200",
       items: [
         {
-          id: "ram-ddr4-16-lexar",
-          name: "16 GB DDR4 3200 MHz Lexar",
-          price: 260.99,
-          source: "KaBuM!",
-          url: "https://www.kabum.com.br/produto/472349",
-          notes: "Mínimo recomendado para estação nova."
+          id: "ram-ddr4-16",
+          name: "16 GB DDR4 3200 MHz desktop",
+          notes: "Mínimo recomendado para estação nova.",
+          offers: [
+            offer("kabum", "Lexar 16GB DDR4 3200 MHz", 260.99, "Em estoque", "https://www.kabum.com.br/produto/472349"),
+            offer("kabum", "Patriot Signature 16GB DDR4 3200 MHz", 341.99, "Em estoque", "https://www.kabum.com.br/produto/927107/memoria-ram-patriot-signature-16gb-1x16gb-3200mhz-ddr4-cl22-preta-psd416g32002"),
+            offer("magalu", "Patriot 16GB DDR4 3200 MHz", 390, "Disponível", "https://www.magazineluiza.com.br/memoria-16gb-desktop-patriot-ddr4-3200mhz-udimm-psd416g32002/p/dgj4ehd45k/in/mram/", "R$ 362,70 no Pix")
+          ]
         },
         {
-          id: "ram-ddr4-16-patriot",
-          name: "16 GB DDR4 3200 MHz Patriot",
-          price: 341.99,
-          source: "KaBuM!",
-          url: "https://www.kabum.com.br/produto/927107/memoria-ram-patriot-signature-16gb-1x16gb-3200mhz-ddr4-cl22-preta-psd416g32002",
-          notes: "Alternativa DDR4."
+          id: "ram-ddr4-32",
+          name: "32 GB DDR4 3200 MHz, 2x16 GB",
+          notes: "Para setores com multitarefa pesada.",
+          offers: [
+            offer("kabum", "2x Lexar 16GB DDR4 3200 MHz", 521.98, "Em estoque", "https://www.kabum.com.br/produto/472349", "Preço calculado como 2 unidades")
+          ]
         },
         {
-          id: "ram-ddr4-32-lexar-kit",
-          name: "32 GB DDR4 3200 MHz, 2x16 GB Lexar",
-          price: 521.98,
-          source: "KaBuM!",
-          url: "https://www.kabum.com.br/produto/472349",
-          notes: "Para setores com muitas abas, relatórios e aplicações simultâneas."
+          id: "ram-ddr4-4-datafor",
+          name: "4 GB DDR4 2666 MHz desktop",
+          notes: "Peça de reposição; abaixo do padrão recomendado.",
+          offers: [
+            offer("datafor", "WinMemory 4GB DDR4 2666 MHz", 213.2, "Imediata", "https://www.datafor.com.br/informatica/componentes/memorias/memoria-ddr4-4gb-2666mhz-winmemory")
+          ]
         },
         {
-          id: "ram-ddr5-16-bluecase",
-          name: "16 GB DDR5 4800 MHz Bluecase",
-          price: 279.96,
-          source: "KaBuM!",
-          url: "https://www.kabum.com.br/produto/882267/memoria-ram-ddr5-16gb-4800mhz-1-2v-single-rank-bluecase-bml5d48m12v40-16g",
-          notes: "Usar somente em placa-mãe DDR5."
+          id: "ram-ddr5-16",
+          name: "16 GB DDR5 4800 MHz desktop",
+          notes: "Usar somente com placa-mãe DDR5.",
+          offers: [
+            offer("kabum", "Bluecase 16GB DDR5 4800 MHz", 279.96, "Em estoque", "https://www.kabum.com.br/produto/882267/memoria-ram-ddr5-16gb-4800mhz-1-2v-single-rank-bluecase-bml5d48m12v40-16g")
+          ]
         }
       ]
     },
     {
       id: "storage",
-      label: "Armazenamento",
+      label: "Armazenamento primário",
       required: true,
-      defaultItem: "ssd-500-kingston",
-      search: "SSD NVMe 500GB 1TB M.2",
+      defaultItem: "ssd-nvme-500",
+      search: "SSD NVMe 500GB M.2",
       items: [
         {
-          id: "ssd-256-adata",
-          name: "SSD ADATA 256 GB NVMe M.2",
-          price: 449.99,
-          source: "KaBuM!",
-          url: "https://www.kabum.com.br/produto/593419/",
-          notes: "Capacidade mínima; considerar 500 GB para mais folga."
+          id: "ssd-nvme-500",
+          name: "SSD NVMe M.2 500 GB",
+          notes: "Armazenamento principal recomendado.",
+          offers: [
+            offer("datafor", "Kingston NV1 500GB NVMe", 459, "Disponível", "https://www.datafor.com.br/informatica/armazenamento/ssds", "R$ 436,05 à vista"),
+            offer("kabum", "Kingston NV3 500GB NVMe", 599.99, "Em estoque", "https://www.kabum.com.br/produto/621161/ssd-kingston-nv3-500-gb-m-2-2280-pcie-4-0-x4-nvme-leitura-5000-mb-s-gravacao-3000-mb-s-azul-snv3s-500g")
+          ]
         },
         {
-          id: "ssd-500-kingston",
-          name: "SSD Kingston NV3 500 GB NVMe M.2 2280",
-          price: 299.99,
-          source: "KaBuM!",
-          url: "https://www.kabum.com.br/produto/621161/ssd-kingston-nv3-500-gb-m-2-2280-pcie-4-0-x4-nvme-leitura-5000-mb-s-gravacao-3000-mb-s-azul-snv3s-500g",
-          notes: "Boa base para Windows, Office, MV e navegador."
+          id: "ssd-sata-480",
+          name: "SSD SATA 480 GB",
+          notes: "Alternativa para máquinas sem slot M.2.",
+          offers: [
+            offer("datafor", "Kingston A400 480GB SATA", 335, "Disponível", "https://www.datafor.com.br/informatica/armazenamento/ssds", "R$ 318,25 à vista")
+          ]
         },
         {
-          id: "ssd-1tb-kingston",
-          name: "SSD Kingston NV3 1 TB NVMe M.2 2280",
-          price: 479.99,
-          source: "KaBuM!",
-          url: "https://www.kabum.com.br/produto/621162/ssd-kingston-nv3-1-tb-m-2-2280-pcie-4-0-x4-nvme-leitura-6000-mb-s-gravacao-4000-mb-s-azul-snv3s-1000g",
-          notes: "Para estações com muitos documentos locais."
+          id: "ssd-sata-240-hardsoft",
+          name: "SSD SATA 240 GB",
+          notes: "Peça de reposição básica.",
+          offers: [
+            offer("hardsoft", "Kingston UV300 240GB SATA", 296.65, "Em estoque", "https://www.hardsoftnet.com.br/ssd-sata-iii-2-5-240-gb-kingston-uv-300", "R$ 262,54 no débito/boleto/transferência")
+          ]
+        }
+      ]
+    },
+    {
+      id: "secondaryStorage",
+      label: "Armazenamento secundário",
+      required: false,
+      defaultItem: "storage-none",
+      search: "HD interno externo 1TB 4TB",
+      items: [
+        noStockItem("storage-none", "Sem armazenamento secundário", "Use quando o SSD principal for suficiente."),
+        {
+          id: "hd-1tb-notebook",
+          name: "HD 1 TB SATA notebook",
+          notes: "Opção para armazenamento local adicional.",
+          offers: [
+            offer("datafor", "WD Blue 1TB SATA3 notebook", 399, "Disponível", "https://www.datafor.com.br/armazenamento", "R$ 379,05 à vista")
+          ]
+        },
+        {
+          id: "hd-4tb-desktop",
+          name: "HD interno 4 TB desktop",
+          notes: "Uso específico para grande volume local.",
+          offers: [
+            offer("datafor", "Seagate Barracuda 4TB", 1279, "Disponível", "https://www.datafor.com.br/armazenamento", "R$ 1.215,05 à vista")
+          ]
         }
       ]
     },
@@ -158,32 +194,33 @@ window.SCMJF_PARTS_CATALOG = {
       id: "psu",
       label: "Fonte",
       required: true,
-      defaultItem: "psu-mach1-500",
-      search: "fonte 500W 80 Plus Bronze PFC ativo",
+      defaultItem: "psu-500-bronze",
+      search: "fonte ATX 500W 80 Plus Bronze",
       items: [
         {
-          id: "psu-mach1-500",
-          name: "MACH1 Steady 500W 80 Plus Bronze",
-          price: 189.99,
-          source: "KaBuM!",
-          url: "https://www.kabum.com.br/produto/912181/",
-          notes: "Potência suficiente para estação sem GPU dedicada."
+          id: "psu-500-bronze",
+          name: "Fonte ATX 500W 80 Plus Bronze",
+          notes: "Potência suficiente para estação sem GPU dedicada.",
+          offers: [
+            offer("kabum", "MACH1 Steady 500W Bronze", 189.99, "Em estoque", "https://www.kabum.com.br/produto/912181/"),
+            offer("magalu", "Draxen DN500 500W Bronze", 299, "Disponível", "https://www.magazineluiza.com.br/fonte-atx-500w-80-plus-bronze-pfc-ativo-dn500-draxen/p/hjk14ajcd1/cj/fnta/", "R$ 284,05 no Pix")
+          ]
         },
         {
-          id: "psu-brx-500",
-          name: "BRX Rainbow ATX 500W 80 Plus",
-          price: 255.61,
-          source: "KaBuM!",
-          url: "https://www.kabum.com.br/produto/459595/fonte-brx-rainbow-atx-500w-80-plus-automatica-pfc",
-          notes: "Alternativa de 500W."
+          id: "psu-600-datafor",
+          name: "Fonte ATX 600W",
+          notes: "Opção com margem maior.",
+          offers: [
+            offer("datafor", "T-Dagger 600W", 289, "Imediata", "https://www.datafor.com.br/informatica/componentes/fonte-atx-600w-potencia-real-t-dagger")
+          ]
         },
         {
-          id: "psu-brx-650",
-          name: "BRX Ampereon 650W 80 Plus Bronze",
-          price: 710,
-          source: "KaBuM!",
-          url: "https://www.kabum.com.br/produto/1000400/fonte-brx-ampereon-650w-automatica-80-plus-bronze",
-          notes: "Usar quando houver GPU dedicada ou margem elétrica maior."
+          id: "psu-850-datafor",
+          name: "Fonte 850W 80 Plus Bronze",
+          notes: "Para configuração com GPU ou expansão.",
+          offers: [
+            offer("datafor", "C3Tech PS-G850 850W Bronze", 629, "Disponível", "https://www.datafor.com.br/fontes", "R$ 597,55 à vista")
+          ]
         }
       ]
     },
@@ -191,98 +228,121 @@ window.SCMJF_PARTS_CATALOG = {
       id: "case",
       label: "Gabinete",
       required: true,
-      defaultItem: "case-c3tech-mt30",
-      search: "gabinete micro ATX preto sem fonte",
+      defaultItem: "case-basic",
+      search: "gabinete micro ATX sem fonte",
       items: [
         {
-          id: "case-c3tech-mt30",
-          name: "C3Tech MT-30BK Micro ATX com fonte 200W",
-          price: 119.99,
-          source: "KaBuM!",
-          url: "https://www.kabum.com.br/produto/761525/gabinete-c3tech-micro-atx-mid-tower-com-fonte-200w-sem-fans-preto-mt-30bk",
-          notes: "Usar a fonte dedicada do orçamento; validar espaço interno."
+          id: "case-basic",
+          name: "Gabinete Micro ATX básico",
+          notes: "Gabinete econômico para estação administrativa.",
+          offers: [
+            offer("kabum", "Duex DX255-8 Micro ATX", 69.7, "Em estoque", "https://www.kabum.com.br/produto/503901/gabinete-duex-micro-atx-mini-atx-preto-dx255-8"),
+            offer("kabum", "C3Tech MT-30BK Micro ATX", 119.99, "Em estoque", "https://www.kabum.com.br/produto/761525/gabinete-c3tech-micro-atx-mid-tower-com-fonte-200w-sem-fans-preto-mt-30bk")
+          ]
         },
         {
-          id: "case-duex-dx255",
-          name: "Duex DX255-8 Micro ATX preto",
-          price: 69.7,
-          source: "KaBuM!",
-          url: "https://www.kabum.com.br/produto/503901/gabinete-duex-micro-atx-mini-atx-preto-dx255-8",
-          notes: "Opção econômica."
-        },
-        {
-          id: "case-vinik-one",
-          name: "Vinik One M1 Micro ATX sem fonte",
-          price: 227.88,
-          source: "KaBuM!",
-          url: "https://www.kabum.com.br/produto/121809/gabinete-vinik-one-m1-mid-tower-micro-atx-preto-s-fonte-32373",
-          notes: "Gabinete sem fonte, melhor para padronizar PSU."
+          id: "case-datafor-g80",
+          name: "Gabinete C3Tech MT-G80BK sem fonte",
+          notes: "Opção Datafor sem fonte.",
+          offers: [
+            offer("datafor", "C3Tech MT-G80BK", 189, "Disponível", "https://www.datafor.com.br/loja/catalogo.php?categoria=19&computer_manufacturers=208&dir=asc&loja=687149&order=name&pg=1", "R$ 179,55 à vista")
+          ]
         }
       ]
     },
     {
       id: "cooler",
-      label: "Cooler",
+      label: "Cooler do processador",
       required: true,
-      defaultItem: "cooler-intel-lga1700",
-      search: "cooler processador LGA1700 AM4 AM5 65W",
+      defaultItem: "cooler-box",
+      search: "cooler processador LGA1700 AM4 AM5",
       items: [
         {
-          id: "cooler-intel-lga1700",
-          name: "Cooler Intel LGA1700 65W",
-          price: 87.54,
-          source: "KaBuM!",
-          url: "https://www.kabum.com.br/produto/294887/cooler-para-processador-lga-1700-intel-12-13-geracao-m23901-001-intel",
-          notes: "Compatível com Intel LGA1700 de 65W."
-        },
-        {
-          id: "cooler-notus-st17",
-          name: "PCYES Notus ST17 LGA1700 65W",
-          price: 107.88,
-          source: "KaBuM!",
-          url: "https://www.kabum.com.br/produto/623529/cooler-para-processador-notus-st17-lga-1700-tdp-65w-st1765w",
-          notes: "Alternativa LGA1700."
-        },
-        {
-          id: "cooler-box-incluso",
+          id: "cooler-box",
           name: "Cooler box incluso no processador",
-          price: 0,
-          source: "Validar SKU do processador",
-          url: "https://www.kabum.com.br/",
-          notes: "Usar somente se o processador comprado vier com cooler."
+          notes: "Usar somente quando o SKU comprado incluir cooler.",
+          offers: [
+            offer("kabum", "Cooler incluso no SKU", 0, "Validar SKU", "https://www.kabum.com.br/", "Sem custo adicional quando incluso")
+          ]
+        },
+        {
+          id: "cooler-intel",
+          name: "Cooler Intel LGA1700 65W",
+          notes: "Cooler de reposição para Intel LGA1700.",
+          offers: [
+            offer("kabum", "Cooler Intel LGA1700", 87.54, "Em estoque", "https://www.kabum.com.br/produto/294887/cooler-para-processador-lga-1700-intel-12-13-geracao-m23901-001-intel")
+          ]
+        },
+        {
+          id: "cooler-datafor",
+          name: "Air cooler Intel/AMD 120mm",
+          notes: "Opção universal publicada pela Datafor.",
+          offers: [
+            offer("datafor", "K-Mex AC02 120mm LGA1200/1700", 175, "Disponível", "https://www.datafor.com.br/gamer", "R$ 166,25 à vista")
+          ]
         }
       ]
     },
     {
-      id: "license",
-      label: "Sistema operacional",
+      id: "thermalPaste",
+      label: "Pasta térmica",
       required: false,
-      defaultItem: "os-existing-contract",
-      search: "Windows 11 Pro licença oficial Brasil",
+      defaultItem: "paste-vinik",
+      search: "pasta térmica processador",
       items: [
+        noStockItem("paste-none", "Sem pasta térmica avulsa", "Use quando cooler/processador já possuir composto térmico."),
         {
-          id: "os-existing-contract",
-          name: "Licenciamento existente / contrato institucional",
-          price: 0,
-          source: "Validar com TI e compras",
-          url: "https://www.microsoft.com/pt-br/windows/business",
-          notes: "Use quando a Santa Casa já possuir licenciamento ou imagem corporativa."
+          id: "paste-vinik",
+          name: "Pasta térmica Vinik 10g",
+          notes: "Item de montagem/manutenção.",
+          offers: [
+            offer("datafor", "Vinik TG010 10g", 15, "Disponível", "https://www.datafor.com.br/pastatermica/pasta-termica-10gr-branca-seringa-tg010-vinik", "R$ 14,25 à vista")
+          ]
         },
         {
-          id: "os-windows-pro-retail",
-          name: "Windows 11 Pro, download Microsoft Store",
-          price: 1599,
-          source: "Microsoft Store Brasil",
-          url: "https://www.microsoft.com/pt-br/d/windows-11-pro/dg7gmgf0d8h4",
-          notes: "Preço oficial varejo; pode não ser o melhor modelo para compra institucional."
-        },
+          id: "paste-pcyes",
+          name: "Pasta térmica PCYes 1,5g",
+          notes: "Com maior condutividade.",
+          offers: [
+            offer("datafor", "PCYes Nitrogen Basic 1,5g", 25, "Disponível", "https://www.datafor.com.br/pastatermica/pasta-termica-prata-5-5wmk-1-5gr-pcyes-nitrogen-basic-pcynb1555", "R$ 23,75 à vista")
+          ]
+        }
+      ]
+    },
+    {
+      id: "caseFan",
+      label: "Fan de gabinete",
+      required: false,
+      defaultItem: "fan-none",
+      search: "fan gabinete 120mm",
+      items: [
+        noStockItem("fan-none", "Sem fan extra", "Use quando o gabinete já atender a ventilação."),
         {
-          id: "os-windows-oem",
-          name: "Windows 11 Pro OEM, referência de mercado",
-          price: 180,
-          source: "Cia da Informática",
-          url: "https://www.ciainfor.com.br/licenca-microsoft-windows-11-pro",
-          notes: "Validar regra de venda vinculada a hardware novo e documentação fiscal."
+          id: "fan-c3tech",
+          name: "Fan 120mm RGB C3Tech",
+          notes: "Ventilação extra para gabinete.",
+          offers: [
+            offer("datafor", "C3Tech F9-L310WH-RGB 120mm", 57, "Disponível", "https://www.datafor.com.br/gamer", "R$ 54,15 à vista")
+          ]
+        }
+      ]
+    },
+    {
+      id: "gpu",
+      label: "Placa de vídeo",
+      required: false,
+      defaultItem: "gpu-none",
+      search: "placa de vídeo RX 550 4GB",
+      items: [
+        noStockItem("gpu-none", "Vídeo integrado do processador", "Padrão para estação administrativa."),
+        {
+          id: "gpu-rx550",
+          name: "Radeon RX 550 4GB",
+          notes: "Opcional para múltiplos monitores ou CPU sem vídeo integrado.",
+          offers: [
+            offer("kabum", "VXPRO RX 550 4GB Low Profile", 697, "Em estoque", "https://www.kabum.com.br/produto/655595/placa-de-video-vxpro-rx-550-radeon-4gb-ddr5-128-bits-low-profile-hdmi-dvi-display-port-vxrx550-4gd5"),
+            offer("datafor", "PCYes RX550 4GB", 989, "Imediata", "https://www.datafor.com.br/gamer/componentes/placa-de-video/placa-de-video-4gb-rx550-amd-radeon-gddr5-128-bits-dual-fan-graffiti-series-pajrx550dr5df", "R$ 939,55 à vista")
+          ]
         }
       ]
     },
@@ -290,114 +350,123 @@ window.SCMJF_PARTS_CATALOG = {
       id: "monitor",
       label: "Monitor",
       required: false,
-      defaultItem: "monitor-22-aitek",
-      search: "monitor 22 polegadas Full HD HDMI VGA",
+      defaultItem: "monitor-none",
+      search: "monitor Full HD HDMI 22 24 polegadas",
       items: [
+        noStockItem("monitor-none", "Reutilizar monitor existente", "Use quando a troca for apenas da CPU."),
         {
-          id: "monitor-none",
-          name: "Reutilizar monitor existente",
-          price: 0,
-          source: "Inventário local",
-          url: "https://www.kabum.com.br/busca/monitor-22-full-hd",
-          notes: "Use quando a troca for apenas da CPU."
+          id: "monitor-basic",
+          name: "Monitor HDMI básico",
+          notes: "Monitor simples para estação administrativa.",
+          offers: [
+            offer("kabum", "Monitor LED 22 polegadas Full HD", 398.99, "Em estoque", "https://www.kabum.com.br/produto/508157/monitor-pc-led-full-hd-tela-22-polegadas-60hz-hdmi-vga-audio"),
+            offer("datafor", "AOC 18,5 HDMI", 439, "Disponível", "https://www.datafor.com.br/informatica/monitores/monitor-18-5-aoc-e970-swhnl-hdmi", "R$ 417,05 à vista")
+          ]
         },
         {
-          id: "monitor-22-aitek",
-          name: "Monitor LED 22 polegadas Full HD HDMI/VGA",
-          price: 398.99,
-          source: "KaBuM!",
-          url: "https://www.kabum.com.br/produto/508157/monitor-pc-led-full-hd-tela-22-polegadas-60hz-hdmi-vga-audio",
-          notes: "Opção básica."
-        },
-        {
-          id: "monitor-22-msi",
-          name: "Monitor MSI PRO 22 polegadas FHD IPS",
-          price: 549.99,
-          source: "KaBuM!",
-          url: "https://www.kabum.com.br/produto/644466/",
-          notes: "Melhor painel e ergonomia básica."
-        },
-        {
-          id: "monitor-22-aoc",
-          name: "Monitor AOC 22 polegadas FHD com ajuste de altura",
-          price: 649.99,
-          source: "KaBuM!",
-          url: "https://www.kabum.com.br/produto/909129/monitor-office-aoc-22-fhd-75hz-4ms-va-hdmi-e-vga-altura-ajustavel-preto-22b3hmf",
-          notes: "Opção com ajuste de altura."
+          id: "monitor-24-datafor",
+          name: "Monitor 23,8 Full HD HDMI/VGA",
+          notes: "Tela maior para uso administrativo.",
+          offers: [
+            offer("datafor", "AOC 24B30HM2 23,8 Full HD", 729, "Disponível", "https://www.datafor.com.br/gamer", "R$ 692,55 à vista"),
+            offer("kabum", "MSI PRO 22 IPS Full HD", 549.99, "Em estoque", "https://www.kabum.com.br/produto/644466/")
+          ]
         }
       ]
     },
     {
-      id: "peripherals",
-      label: "Teclado e mouse",
+      id: "keyboard",
+      label: "Teclado",
       required: false,
-      defaultItem: "peripheral-mk235",
-      search: "combo teclado mouse USB ABNT2",
+      defaultItem: "keyboard-none",
+      search: "teclado USB ABNT2",
       items: [
+        noStockItem("keyboard-none", "Reutilizar teclado existente", "Use quando periféricos atuais estiverem bons."),
         {
-          id: "peripheral-none",
-          name: "Reutilizar teclado e mouse existentes",
-          price: 0,
-          source: "Inventário local",
-          url: "https://www.kabum.com.br/busca/combo-teclado-mouse",
-          notes: "Use quando periféricos atuais estiverem bons."
+          id: "keyboard-k120",
+          name: "Teclado USB ABNT2",
+          notes: "Teclado com fio para estação.",
+          offers: [
+            offer("datafor", "Logitech K120 Office ABNT2", 112, "Disponível", "https://www.datafor.com.br/informatica/teclados-usb")
+          ]
         },
         {
-          id: "peripheral-mk235",
-          name: "Logitech MK235 sem fio ABNT2",
-          price: 119.9,
-          source: "KaBuM!",
-          url: "https://www.kabum.com.br/produto/79357/combo-teclado-e-mouse-sem-fio-logitech-mk235-com-conexao-usb-pilhas-inclusas-e-layout-abnt2-920-007903",
-          notes: "Combo sem fio simples."
-        },
-        {
-          id: "peripheral-mk270",
-          name: "Logitech MK270 sem fio ABNT2",
-          price: 169.99,
-          source: "KaBuM!",
-          url: "https://www.kabum.com.br/produto/35990/",
-          notes: "Combo sem fio com teclas multimídia."
+          id: "keyboard-mk120",
+          name: "Kit teclado + mouse USB",
+          notes: "Combo com fio.",
+          offers: [
+            offer("datafor", "Logitech MK120", 169, "Imediata", "https://www.datafor.com.br/informatica/teclados/teclado-e-mouse-usb-mk120-logitech", "R$ 160,55 à vista")
+          ]
         }
       ]
     },
     {
-      id: "powerProtection",
-      label: "Proteção elétrica",
+      id: "mouse",
+      label: "Mouse",
       required: false,
-      defaultItem: "power-none",
-      search: "nobreak 600VA computador 115V 220V",
+      defaultItem: "mouse-none",
+      search: "mouse USB sem fio",
       items: [
+        noStockItem("mouse-none", "Reutilizar mouse existente", "Use quando periféricos atuais estiverem bons."),
         {
-          id: "power-none",
-          name: "Sem nobreak no orçamento",
-          price: 0,
-          source: "Decisão de compras",
-          url: "https://www.kabum.com.br/busca/nobreak-600va",
-          notes: "Use quando o setor já possui proteção elétrica."
+          id: "mouse-m170",
+          name: "Mouse sem fio Logitech M170",
+          notes: "Mouse sem fio básico.",
+          offers: [
+            offer("datafor", "Logitech M170", 99, "Disponível", "https://www.datafor.com.br/mousesemfio", "R$ 94,05 à vista")
+          ]
         },
         {
-          id: "power-jbr-600",
-          name: "Nobreak JBR Guard 600VA 120V",
-          price: 299.99,
-          source: "KaBuM!",
-          url: "https://www.kabum.com.br/produto/878099/",
-          notes: "Validar tensão do setor."
+          id: "mouse-c3tech",
+          name: "Mouse USB C3Tech",
+          notes: "Mouse com fio básico.",
+          offers: [
+            offer("datafor", "C3Tech MG-80BK", 75, "Disponível", "https://www.datafor.com.br/mousegamer/mouse-gamer-usb-mg-80bk-c3tech", "R$ 71,25 à vista")
+          ]
+        }
+      ]
+    },
+    {
+      id: "webcam",
+      label: "Webcam",
+      required: false,
+      defaultItem: "webcam-none",
+      search: "webcam HD 720p microfone",
+      items: [
+        noStockItem("webcam-none", "Sem webcam", "Use quando a estação não precisa de vídeo."),
+        {
+          id: "webcam-c270",
+          name: "Webcam Logitech C270 HD",
+          notes: "Webcam 720p com microfone.",
+          offers: [
+            offer("datafor", "Logitech C270", 329, "Imediata", "https://www.datafor.com.br/informatica/acessorios/webcam/webcam-logitech-c270-hd-720p-com-microfone-preto", "R$ 312,55 à vista")
+          ]
+        }
+      ]
+    },
+    {
+      id: "audio",
+      label: "Áudio",
+      required: false,
+      defaultItem: "audio-none",
+      search: "headset com microfone caixa de som USB",
+      items: [
+        noStockItem("audio-none", "Sem áudio dedicado", "Use quando a estação não precisa de headset/caixa de som."),
+        {
+          id: "headset-h151",
+          name: "Headset com microfone",
+          notes: "Uso em chamadas e suporte.",
+          offers: [
+            offer("datafor", "Logitech H151", 210, "Imediata", "https://www.datafor.com.br/audio-e-som/headsets/headset-com-microfone-h151-logitech", "R$ 199,50 à vista")
+          ]
         },
         {
-          id: "power-ts-600",
-          name: "Nobreak TS Shara Mini 600VA 115V",
-          price: 359.99,
-          source: "KaBuM!",
-          url: "https://www.kabum.com.br/produto/916112/",
-          notes: "6 tomadas; validar autonomia esperada."
-        },
-        {
-          id: "power-apc-600",
-          name: "Nobreak APC Back-UPS 600VA 115V",
-          price: 485.9,
-          source: "KaBuM!",
-          url: "https://www.kabum.com.br/produto/457080/",
-          notes: "Marca consolidada; custo maior."
+          id: "speaker-c3tech",
+          name: "Caixa de som 2.0",
+          notes: "Áudio simples para estação.",
+          offers: [
+            offer("datafor", "C3Tech Soundbar 6W SB-50BK", 99, "Disponível", "https://www.datafor.com.br/gamer", "R$ 94,05 à vista")
+          ]
         }
       ]
     },
@@ -406,48 +475,119 @@ window.SCMJF_PARTS_CATALOG = {
       label: "Rede",
       required: false,
       defaultItem: "network-none",
-      search: "adaptador USB Wi-Fi TP-Link 150Mbps",
+      search: "adaptador USB Wi-Fi cabo rede RJ45",
       items: [
+        noStockItem("network-none", "Rede cabeada existente", "Padrão preferencial para estações hospitalares."),
         {
-          id: "network-none",
-          name: "Rede cabeada existente",
-          price: 0,
-          source: "Infraestrutura local",
-          url: "https://www.kabum.com.br/busca/adaptador-wifi-usb",
-          notes: "Padrão preferencial para estações hospitalares."
+          id: "network-usb-rj45",
+          name: "Adaptador USB para RJ45",
+          notes: "Reposição para estações sem porta de rede funcional.",
+          offers: [
+            offer("datafor", "Multilaser WI272 USB x RJ45", 75, "Imediata", "https://www.datafor.com.br/informatica/cabos/cabo-conversor-usb-x-rj45-wi272-multilaser", "R$ 71,25 à vista")
+          ]
         },
         {
-          id: "network-tplink-wn725n",
-          name: "TP-Link TL-WN725N USB Wi-Fi 150Mbps",
-          price: 60.07,
-          source: "KaBuM!",
-          url: "https://www.kabum.com.br/produto/515792/adaptador-usb-wi-fi-tp-link-tl-wn725n-de-150mbps-em-2-4ghz",
-          notes: "Usar somente onde não houver ponto cabeado."
+          id: "network-wifi",
+          name: "Adaptador USB Wi-Fi",
+          notes: "Usar somente onde não houver ponto cabeado.",
+          offers: [
+            offer("kabum", "TP-Link TL-WN725N 150Mbps", 60.07, "Em estoque", "https://www.kabum.com.br/produto/515792/adaptador-usb-wi-fi-tp-link-tl-wn725n-de-150mbps-em-2-4ghz")
+          ]
         }
       ]
     },
     {
-      id: "gpu",
-      label: "Vídeo dedicado",
+      id: "cables",
+      label: "Cabos e adaptadores",
       required: false,
-      defaultItem: "gpu-none",
-      search: "placa de vídeo básica low profile HDMI DisplayPort",
+      defaultItem: "cables-none",
+      search: "cabo HDMI cabo força adaptador vídeo",
       items: [
+        noStockItem("cables-none", "Sem cabos extras", "Use quando os cabos atuais serão reaproveitados."),
         {
-          id: "gpu-none",
-          name: "Vídeo integrado do processador",
-          price: 0,
-          source: "Configuração padrão",
-          url: "https://www.kabum.com.br/busca/placa-de-video-low-profile",
-          notes: "Suficiente para Office, MV, navegador e dois monitores simples quando a placa-mãe suportar."
+          id: "cable-hdmi",
+          name: "Cabo HDMI 5 metros",
+          notes: "Conexão de monitor.",
+          offers: [
+            offer("datafor", "Cabo HDMI v1.4 5m Pluscable", 42, "Disponível", "https://www.datafor.com.br/informatica/monitores/monitor-18-5-aoc-e970-swhnl-hdmi", "R$ 39,90 à vista")
+          ]
         },
         {
-          id: "gpu-rx550",
-          name: "Radeon RX 550 4GB low profile",
-          price: 697,
-          source: "KaBuM!",
-          url: "https://www.kabum.com.br/produto/655595/placa-de-video-vxpro-rx-550-radeon-4gb-ddr5-128-bits-low-profile-hdmi-dvi-display-port-vxrx550-4gd5",
-          notes: "Opcional para múltiplos monitores ou setor específico."
+          id: "adapter-usb-rj45",
+          name: "Conversor USB para RJ45",
+          notes: "Também listado em rede.",
+          offers: [
+            offer("datafor", "Multilaser WI272 USB x RJ45", 75, "Imediata", "https://www.datafor.com.br/informatica/cabos/cabo-conversor-usb-x-rj45-wi272-multilaser", "R$ 71,25 à vista")
+          ]
+        }
+      ]
+    },
+    {
+      id: "powerFilter",
+      label: "Filtro de linha",
+      required: false,
+      defaultItem: "filter-none",
+      search: "filtro de linha 5 tomadas 6 tomadas",
+      items: [
+        noStockItem("filter-none", "Sem filtro de linha", "Use quando o setor já possuir proteção adequada."),
+        {
+          id: "filter-c3tech",
+          name: "Filtro de linha 6 tomadas",
+          notes: "Proteção básica contra sobretensão/sobrecorrente.",
+          offers: [
+            offer("datafor", "C3Tech FL-61BK 6 tomadas", 35, "Imediata", "https://www.datafor.com.br/informatica/energia/filtro-de-linha/filtro-de-linha-6-tomadas-preto-fl-61bk-c3tech", "R$ 33,25 à vista")
+          ]
+        },
+        {
+          id: "filter-intelbras",
+          name: "Filtro de linha 5 tomadas",
+          notes: "Alternativa Intelbras.",
+          offers: [
+            offer("datafor", "Intelbras EPE205 5 tomadas", 55, "Imediata", "https://www.datafor.com.br/informatica/energia/filtros-de-linha/filtro-de-linha-5tomadas-preto-intelbras", "R$ 52,25 à vista")
+          ]
+        }
+      ]
+    },
+    {
+      id: "powerProtection",
+      label: "Nobreak",
+      required: false,
+      defaultItem: "nobreak-none",
+      search: "nobreak 600VA 700VA 1200VA",
+      items: [
+        noStockItem("nobreak-none", "Sem nobreak no orçamento", "Use quando o setor já possui proteção elétrica."),
+        {
+          id: "nobreak-600",
+          name: "Nobreak 600VA",
+          notes: "Proteção básica para uma estação.",
+          offers: [
+            offer("kabum", "JBR Guard 600VA 120V", 299.99, "Em estoque", "https://www.kabum.com.br/produto/878099/"),
+            offer("datafor", "SMS Lite 600VA", 525, "Disponível", "https://www.datafor.com.br/nobreak", "R$ 498,75 à vista")
+          ]
+        },
+        {
+          id: "nobreak-700",
+          name: "Nobreak 700VA",
+          notes: "Alternativa Datafor.",
+          offers: [
+            offer("datafor", "TS Shara UPS Mini 700VA", 429, "Disponível", "https://www.datafor.com.br/nobreak", "R$ 407,55 à vista")
+          ]
+        }
+      ]
+    },
+    {
+      id: "license",
+      label: "Sistema operacional",
+      required: false,
+      defaultItem: "os-no-public-price",
+      search: "licença Windows 11 Pro fornecedor hospital",
+      items: [
+        noStockItem("os-no-public-price", "Licenciamento a validar com contrato institucional", "Nenhum preço público confiável foi encontrado nos fornecedores permitidos."),
+        {
+          id: "os-none",
+          name: "Sem licença no orçamento",
+          notes: "Use quando imagem/licença corporativa já estiver disponível.",
+          offers: []
         }
       ]
     }
@@ -456,142 +596,165 @@ window.SCMJF_PARTS_CATALOG = {
     {
       id: "base",
       label: "Base Santa Casa",
-      description: "Estação administrativa com 16 GB, SSD NVMe 500 GB, vídeo integrado e sem periféricos novos.",
-      included: {
-        cpu: true,
-        motherboard: true,
-        memory: true,
-        storage: true,
-        psu: true,
-        case: true,
-        cooler: true,
-        license: false,
-        monitor: false,
-        peripherals: false,
-        powerProtection: false,
-        network: false,
-        gpu: false
-      },
+      description: "Estação administrativa com CPU, placa-mãe, 16 GB, SSD, fonte, gabinete e cooler.",
+      included: baseIncluded(false),
       selections: {
-        cpu: "cpu-i5-12400",
-        motherboard: "mb-h610-ddr4",
-        memory: "ram-ddr4-16-lexar",
-        storage: "ssd-500-kingston",
-        psu: "psu-mach1-500",
-        case: "case-c3tech-mt30",
-        cooler: "cooler-intel-lga1700",
-        license: "os-existing-contract",
+        cpu: "cpu-i5-10400",
+        motherboard: "mb-h610-msi",
+        memory: "ram-ddr4-16",
+        storage: "ssd-nvme-500",
+        secondaryStorage: "storage-none",
+        psu: "psu-500-bronze",
+        case: "case-basic",
+        cooler: "cooler-box",
+        thermalPaste: "paste-none",
+        caseFan: "fan-none",
+        gpu: "gpu-none",
         monitor: "monitor-none",
-        peripherals: "peripheral-none",
-        powerProtection: "power-none",
+        keyboard: "keyboard-none",
+        mouse: "mouse-none",
+        webcam: "webcam-none",
+        audio: "audio-none",
         network: "network-none",
-        gpu: "gpu-none"
+        cables: "cables-none",
+        powerFilter: "filter-none",
+        powerProtection: "nobreak-none",
+        license: "os-no-public-price"
       }
     },
     {
       id: "complete",
       label: "Estação completa",
-      description: "CPU completa com monitor, teclado/mouse e licenciamento institucional a validar.",
+      description: "Inclui monitor, teclado, mouse, filtro de linha e cabos básicos.",
       included: {
-        cpu: true,
-        motherboard: true,
-        memory: true,
-        storage: true,
-        psu: true,
-        case: true,
-        cooler: true,
-        license: true,
+        ...baseIncluded(false),
         monitor: true,
-        peripherals: true,
-        powerProtection: false,
-        network: false,
-        gpu: false
+        keyboard: true,
+        mouse: true,
+        cables: true,
+        powerFilter: true
       },
       selections: {
-        cpu: "cpu-i5-12400",
-        motherboard: "mb-h610-ddr4",
-        memory: "ram-ddr4-16-lexar",
-        storage: "ssd-500-kingston",
-        psu: "psu-mach1-500",
-        case: "case-vinik-one",
-        cooler: "cooler-intel-lga1700",
-        license: "os-existing-contract",
-        monitor: "monitor-22-msi",
-        peripherals: "peripheral-mk235",
-        powerProtection: "power-none",
+        cpu: "cpu-i5-10400",
+        motherboard: "mb-h610-msi",
+        memory: "ram-ddr4-16",
+        storage: "ssd-nvme-500",
+        secondaryStorage: "storage-none",
+        psu: "psu-500-bronze",
+        case: "case-basic",
+        cooler: "cooler-box",
+        thermalPaste: "paste-vinik",
+        caseFan: "fan-none",
+        gpu: "gpu-none",
+        monitor: "monitor-basic",
+        keyboard: "keyboard-k120",
+        mouse: "mouse-m170",
+        webcam: "webcam-none",
+        audio: "audio-none",
         network: "network-none",
-        gpu: "gpu-none"
+        cables: "cable-hdmi",
+        powerFilter: "filter-c3tech",
+        powerProtection: "nobreak-none",
+        license: "os-no-public-price"
       }
     },
     {
       id: "performance",
       label: "Setor pesado",
-      description: "Mais CPU, 32 GB de RAM e SSD 1 TB para setores com multitarefa intensa.",
+      description: "32 GB, SSD NVMe, monitor maior, nobreak e acessórios de suporte.",
       included: {
-        cpu: true,
-        motherboard: true,
-        memory: true,
-        storage: true,
-        psu: true,
-        case: true,
-        cooler: true,
-        license: true,
+        ...baseIncluded(false),
         monitor: true,
-        peripherals: true,
+        keyboard: true,
+        mouse: true,
+        webcam: true,
+        audio: true,
+        cables: true,
+        powerFilter: true,
         powerProtection: true,
-        network: false,
-        gpu: false
-      },
-      selections: {
-        cpu: "cpu-i5-13400",
-        motherboard: "mb-h610-ntc",
-        memory: "ram-ddr4-32-lexar-kit",
-        storage: "ssd-1tb-kingston",
-        psu: "psu-mach1-500",
-        case: "case-vinik-one",
-        cooler: "cooler-notus-st17",
-        license: "os-existing-contract",
-        monitor: "monitor-22-aoc",
-        peripherals: "peripheral-mk270",
-        powerProtection: "power-ts-600",
-        network: "network-none",
-        gpu: "gpu-none"
-      }
-    },
-    {
-      id: "am5",
-      label: "Plataforma AM5",
-      description: "Configuração atualizada com Ryzen 8500G, DDR5 e SSD 1 TB.",
-      included: {
-        cpu: true,
-        motherboard: true,
-        memory: true,
-        storage: true,
-        psu: true,
-        case: true,
-        cooler: true,
-        license: false,
-        monitor: false,
-        peripherals: false,
-        powerProtection: false,
-        network: false,
-        gpu: false
+        thermalPaste: true
       },
       selections: {
         cpu: "cpu-ryzen-8500g",
-        motherboard: "mb-a620-ddr5",
-        memory: "ram-ddr5-16-bluecase",
-        storage: "ssd-1tb-kingston",
-        psu: "psu-mach1-500",
-        case: "case-vinik-one",
-        cooler: "cooler-box-incluso",
-        license: "os-existing-contract",
-        monitor: "monitor-none",
-        peripherals: "peripheral-none",
-        powerProtection: "power-none",
+        motherboard: "mb-a620-asus",
+        memory: "ram-ddr4-32",
+        storage: "ssd-nvme-500",
+        secondaryStorage: "storage-none",
+        psu: "psu-500-bronze",
+        case: "case-datafor-g80",
+        cooler: "cooler-datafor",
+        thermalPaste: "paste-pcyes",
+        caseFan: "fan-c3tech",
+        gpu: "gpu-none",
+        monitor: "monitor-24-datafor",
+        keyboard: "keyboard-mk120",
+        mouse: "mouse-m170",
+        webcam: "webcam-c270",
+        audio: "headset-h151",
         network: "network-none",
-        gpu: "gpu-none"
+        cables: "cable-hdmi",
+        powerFilter: "filter-intelbras",
+        powerProtection: "nobreak-600",
+        license: "os-no-public-price"
       }
     }
   ]
 };
+
+function offer(supplier, title, price, availability, url, note = "") {
+  const labels = {
+    datafor: "Datafor",
+    vmpack: "VMPack",
+    kabum: "KaBuM!",
+    magalu: "Magazine Luiza",
+    hardsoft: "Hardsoft",
+    shopshipe: "Shopshipe",
+    matchpoint: "Matchpoint"
+  };
+
+  return {
+    supplier,
+    supplierLabel: labels[supplier] || supplier,
+    title,
+    price,
+    availability,
+    url,
+    note,
+    checkedAt: "2026-05-13"
+  };
+}
+
+function noStockItem(id, name, notes) {
+  return {
+    id,
+    name,
+    notes,
+    offers: []
+  };
+}
+
+function baseIncluded(optionalDefault) {
+  return {
+    cpu: true,
+    motherboard: true,
+    memory: true,
+    storage: true,
+    secondaryStorage: optionalDefault,
+    psu: true,
+    case: true,
+    cooler: true,
+    thermalPaste: optionalDefault,
+    caseFan: optionalDefault,
+    gpu: optionalDefault,
+    monitor: optionalDefault,
+    keyboard: optionalDefault,
+    mouse: optionalDefault,
+    webcam: optionalDefault,
+    audio: optionalDefault,
+    network: optionalDefault,
+    cables: optionalDefault,
+    powerFilter: optionalDefault,
+    powerProtection: optionalDefault,
+    license: optionalDefault
+  };
+}

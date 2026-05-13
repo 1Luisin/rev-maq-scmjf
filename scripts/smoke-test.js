@@ -102,6 +102,14 @@ if (!elements.get("#catalogRows").innerHTML.includes("Processador")) {
   throw new Error("Parts catalog was not rendered.");
 }
 
+if (!elements.get("#catalogRows").innerHTML.includes("Datafor")) {
+  throw new Error("Allowed supplier offers were not rendered.");
+}
+
+if (!elements.get("#supplierCoverage").innerHTML.includes("VMPack")) {
+  throw new Error("Supplier whitelist coverage was not rendered.");
+}
+
 handlers.click({
   target: {
     closest(selector) {

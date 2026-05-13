@@ -493,6 +493,7 @@
 
           <section class="results-panel">
             <div id="buildSummary"></div>
+            <div id="supplierCoverage"></div>
             <div id="catalogRows"></div>
           </section>
         </div>
@@ -512,6 +513,7 @@
     `;
 
     renderBuildSummary();
+    renderSupplierCoverage();
     renderCatalogRows();
     renderSearchLinks();
   }
@@ -572,14 +574,39 @@
 
     const term = state.build.partSearch.trim() || "computador desktop i5 16GB SSD NVMe";
     const encoded = encodeURIComponent(term);
-    const links = [
-      ["KaBuM!", `https://www.kabum.com.br/busca/${encoded}`],
-      ["Mercado Livre", `https://lista.mercadolivre.com.br/${encoded}`],
-      ["Zoom", `https://www.zoom.com.br/search?q=${encoded}`],
-      ["Google", `https://www.google.com/search?q=${encoded}`]
-    ];
+    const links = (catalog.metadata.allowedSuppliers || []).map((supplier) => {
+      const searchUrl = supplier.searchUrl || `https://www.google.com/search?q=${encodeURIComponent(supplier.label)}+{query}`;
+      return [supplier.label, searchUrl.replace("{query}", encoded)];
+    });
 
     container.innerHTML = links.map(([label, url]) => `<a class="button button-muted" target="_blank" rel="noreferrer" href="${url}">${label}</a>`).join("");
+  }
+
+  function renderSupplierCoverage() {
+    const container = document.querySelector("#supplierCoverage");
+    if (!container) return;
+
+    const offers = categories.flatMap((category) => category.items.flatMap((item) => getAllowedOffers(item)));
+    const counts = offers.reduce((accumulator, offerItem) => {
+      accumulator[offerItem.supplier] = (accumulator[offerItem.supplier] || 0) + 1;
+      return accumulator;
+    }, {});
+
+    container.innerHTML = `
+      <div class="supplier-grid">
+        ${(catalog.metadata.allowedSuppliers || []).map((supplier) => {
+          const count = counts[supplier.id] || 0;
+          return `
+            <article class="supplier-card ${count ? "" : "is-empty"}">
+              <span>${escapeHtml(supplier.label)}</span>
+              <strong>${formatNumber(count)}</strong>
+              <small>${count ? "ofertas públicas no catálogo" : "sem preço público localizado"}</small>
+            </article>
+          `;
+        }).join("")}
+      </div>
+      <div class="catalog-note">${escapeHtml(catalog.metadata.note)}</div>
+    `;
   }
 
   function renderAuditView() {
@@ -878,15 +905,46 @@
     return category.items.find((item) => item.id === selectedId) || category.items[0] || null;
   }
 
+  function getAllowedOffers(item) {
+    if (!item) return [];
+    const allowed = new Set((catalog.metadata.allowedSuppliers || []).map((supplier) => supplier.id));
+    return (item.offers || [])
+      .filter((offerItem) => allowed.has(offerItem.supplier))
+      .filter((offerItem) => Number.isFinite(Number(offerItem.price)))
+      .sort((a, b) => Number(a.price || 0) - Number(b.price || 0));
+  }
+
+  function getBestOffer(item) {
+    return getAllowedOffers(item)[0] || null;
+  }
+
   function getSelectedPrice(categoryId) {
     if (Object.prototype.hasOwnProperty.call(state.build.priceOverrides, categoryId)) {
       return Number(state.build.priceOverrides[categoryId] || 0);
     }
-    return Number(getSelectedItem(categoryId)?.price || 0);
+    return Number(getBestOffer(getSelectedItem(categoryId))?.price || 0);
   }
 
   function isCategoryIncluded(category) {
     return Boolean(category.required || state.build.included[category.id]);
+  }
+
+  function renderOffers(offers) {
+    if (!offers.length) {
+      return '<span class="offer-empty">Sem preço público encontrado nos fornecedores permitidos.</span>';
+    }
+
+    return `
+      <div class="offer-list">
+        ${offers.map((offerItem) => `
+          <a class="offer-chip" href="${escapeAttr(offerItem.url || "#")}" target="_blank" rel="noreferrer">
+            <strong>${escapeHtml(offerItem.supplierLabel)}</strong>
+            <span>${formatCurrency(offerItem.price)}</span>
+            <small>${escapeHtml(offerItem.availability || "")}</small>
+          </a>
+        `).join("")}
+      </div>
+    `;
   }
 
   function catalogRow(category) {
@@ -894,6 +952,8 @@
     const included = isCategoryIncluded(category);
     const price = getSelectedPrice(category.id);
     const disabled = category.required ? "disabled checked" : included ? "checked" : "";
+    const offers = getAllowedOffers(selected);
+    const bestOffer = getBestOffer(selected);
 
     return `
       <tr class="${included ? "" : "is-muted"}">
@@ -911,10 +971,10 @@
         </td>
         <td>
           <input class="price-input" type="number" min="0" step="0.01" data-price-override="${category.id}" value="${price}">
+          <small>${bestOffer ? `Menor preço: ${escapeHtml(bestOffer.supplierLabel)}` : "Sem preço público na whitelist"}</small>
         </td>
         <td>
-          <a href="${escapeAttr(selected?.url || "#")}" target="_blank" rel="noreferrer">${escapeHtml(selected?.source || "Fonte")}</a>
-          <small>${escapeHtml(catalog.metadata.collectedAt)}</small>
+          ${renderOffers(offers)}
         </td>
       </tr>
     `;
@@ -1064,18 +1124,22 @@
 
   function exportBudgetCsv() {
     const lines = [
-      ["Categoria", "Peça", "Incluído", "Preço", "Fonte", "URL"].join(";")
+      ["Categoria", "Peça", "Incluído", "Preço usado", "Fornecedor usado", "Ofertas permitidas"].join(";")
     ];
 
     categories.forEach((category) => {
       const item = getSelectedItem(category.id);
+      const bestOffer = getBestOffer(item);
+      const offers = getAllowedOffers(item)
+        .map((offerItem) => `${offerItem.supplierLabel}: ${formatCurrency(offerItem.price)} (${offerItem.availability || "sem status"})`)
+        .join(" | ");
       lines.push([
         category.label,
         item?.name || "",
         isCategoryIncluded(category) ? "Sim" : "Não",
         getSelectedPrice(category.id),
-        item?.source || "",
-        item?.url || ""
+        bestOffer?.supplierLabel || "Sem preço público",
+        offers || "Sem preço público encontrado"
       ].map(csvCell).join(";"));
     });
 
