@@ -602,8 +602,7 @@ input {
   font-weight: 700;
 }
 
-.charts-grid,
-.audit-grid {
+.charts-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 18px;
@@ -754,8 +753,7 @@ input {
   .stats-grid,
   .summary-grid,
   .supplier-grid,
-  .charts-grid,
-  .audit-grid {
+  .charts-grid {
     grid-template-columns: 1fr;
   }
 

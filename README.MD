@@ -13,7 +13,6 @@ Abra `index.html` no navegador. O app não usa dependências externas nem servid
 - Cálculo de máquinas abaixo do mínimo e estimativa de custo por lote.
 - Página de montagem com catálogo de peças, links de fonte pública, preços editáveis e fornecedores limitados à lista permitida.
 - Exportação CSV do inventário filtrado e do orçamento.
-- Tela de auditoria com servidores excluídos e computadores duplicados consolidados.
 
 ## Dados
 

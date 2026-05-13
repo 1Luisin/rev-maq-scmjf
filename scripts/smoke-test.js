@@ -51,8 +51,7 @@ global.document = {
     if (selector === ".nav-button") {
       return [
         fakeElement(".nav-button", { view: "inventory" }),
-        fakeElement(".nav-button", { view: "builder" }),
-        fakeElement(".nav-button", { view: "audit" })
+        fakeElement(".nav-button", { view: "builder" })
       ];
     }
     return [];
@@ -108,18 +107,6 @@ if (!elements.get("#catalogRows").innerHTML.includes("Datafor")) {
 
 if (!elements.get("#supplierCoverage").innerHTML.includes("VMPack")) {
   throw new Error("Supplier whitelist coverage was not rendered.");
-}
-
-handlers.click({
-  target: {
-    closest(selector) {
-      return selector === "[data-view]" ? { dataset: { view: "audit" } } : null;
-    }
-  }
-});
-
-if (!elements.get("#app").innerHTML.includes("Servidores excluídos e duplicidades")) {
-  throw new Error("Audit view was not rendered.");
 }
 
 console.log("Smoke test passed");

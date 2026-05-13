@@ -11,8 +11,6 @@
   }
 
   const rows = inventory.sheets.Inventario_Classificado || [];
-  const servers = inventory.sheets.Servidores_Excluidos || [];
-  const duplicates = inventory.sheets.Duplicados || [];
   const categories = catalog.categories || [];
   const categoryById = Object.fromEntries(categories.map((category) => [category.id, category]));
   const profiles = catalog.profiles || [];
@@ -259,11 +257,6 @@
 
     if (state.view === "builder") {
       renderBuilderView();
-      return;
-    }
-
-    if (state.view === "audit") {
-      renderAuditView();
       return;
     }
 
@@ -606,94 +599,6 @@
         }).join("")}
       </div>
       <div class="catalog-note">${escapeHtml(catalog.metadata.note)}</div>
-    `;
-  }
-
-  function renderAuditView() {
-    app.innerHTML = `
-      <section class="section-stack">
-        <div class="section-heading">
-          <div>
-            <p class="eyebrow">Auditoria</p>
-            <h1>Servidores excluídos e duplicidades</h1>
-          </div>
-        </div>
-
-        <div class="summary-grid">
-          ${statCard("Servidores excluídos", servers.length, "Não entram no orçamento de desktops")}
-          ${statCard("Computadores duplicados", duplicates.length, "Consolidados pelo inventário mais recente")}
-          ${statCard("Linhas originais", metricValue("Linhas originais no CSV"), "Antes da consolidação")}
-          ${statCard("Computadores únicos", rows.length, "Base analisada no app")}
-        </div>
-
-        <div class="audit-grid">
-          <section class="results-panel">
-            <div class="result-toolbar">
-              <div>
-                <p class="eyebrow">Servidores</p>
-                <h2>${formatNumber(servers.length)} registros</h2>
-              </div>
-            </div>
-            <div class="table-wrap">
-              <table class="data-table">
-                <thead>
-                  <tr>
-                    <th>Computador</th>
-                    <th>Usuário</th>
-                    <th>SO</th>
-                    <th>RAM</th>
-                    <th>Motivo</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  ${servers.map((row) => `
-                    <tr>
-                      <td><strong>${escapeHtml(row.computador)}</strong></td>
-                      <td>${escapeHtml(row.usuario || "-")}</td>
-                      <td>${escapeHtml(row.sistemaOperacional || "-")}</td>
-                      <td>${formatRam(row.ramGb)}</td>
-                      <td>${escapeHtml(row.motivo || "-")}</td>
-                    </tr>
-                  `).join("")}
-                </tbody>
-              </table>
-            </div>
-          </section>
-
-          <section class="results-panel">
-            <div class="result-toolbar">
-              <div>
-                <p class="eyebrow">Duplicados</p>
-                <h2>${formatNumber(duplicates.length)} registros</h2>
-              </div>
-            </div>
-            <div class="table-wrap">
-              <table class="data-table">
-                <thead>
-                  <tr>
-                    <th>Computador</th>
-                    <th>Qtd.</th>
-                    <th>Linha mantida</th>
-                    <th>Inventário</th>
-                    <th>Registros encontrados</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  ${duplicates.map((row) => `
-                    <tr>
-                      <td><strong>${escapeHtml(row.computador)}</strong></td>
-                      <td>${formatNumber(row.quantidadeRegistros || 0)}</td>
-                      <td>${escapeHtml(row.linhaMantida || "-")}</td>
-                      <td>${escapeHtml(row.inventarioMantido || "-")}</td>
-                      <td>${escapeHtml(row.registrosEncontrados || "-")}</td>
-                    </tr>
-                  `).join("")}
-                </tbody>
-              </table>
-            </div>
-          </section>
-        </div>
-      </section>
     `;
   }
 
