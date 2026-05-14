@@ -1028,7 +1028,7 @@
             const hidden = terms.length && !terms.every((term) => normalize(item.name).includes(term));
             return `
               <button
-                class="part-option ${item.id === selectedId ? "is-selected" : ""}"
+                class="part-option ${item.id === selectedId ? "is-selected" : ""} ${hidden ? "is-filtered-out" : ""}"
                 type="button"
                 data-part-choice="${category.id}"
                 data-item-id="${escapeAttr(item.id)}"
@@ -1040,6 +1040,7 @@
               </button>
             `;
           }).join("")}
+          <div class="part-empty-message" ${visibleItems.length ? "hidden" : ""}>Nenhum item encontrado para a busca.</div>
         </div>
       </div>
     `;
@@ -1057,6 +1058,7 @@
       const search = option.dataset.search || "";
       const matches = terms.every((term) => search.includes(term));
       option.hidden = !matches;
+      option.classList.toggle("is-filtered-out", !matches);
       if (matches) visible += 1;
     });
 
@@ -1064,6 +1066,12 @@
     if (counter) {
       counter.textContent = `${formatNumber(visible)} de ${formatNumber(options.length)} opções`;
     }
+
+    const emptyMessage = picker.querySelector(".part-empty-message");
+    if (emptyMessage) emptyMessage.hidden = visible > 0;
+
+    const list = picker.querySelector(".part-option-list");
+    if (list) list.scrollTop = 0;
   }
 
   function catalogRow(category) {

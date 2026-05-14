@@ -560,6 +560,8 @@ input {
   display: none;
   max-height: 240px;
   overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
   background: #ffffff;
   border: 1px solid var(--line);
   border-radius: 8px;
@@ -583,6 +585,12 @@ input {
   text-align: left;
 }
 
+.part-option[hidden],
+.part-option.is-filtered-out,
+.part-empty-message[hidden] {
+  display: none !important;
+}
+
 .part-option:last-child {
   border-bottom: 0;
 }
@@ -601,6 +609,12 @@ input {
   margin: 0;
   color: var(--ink-500);
   font-size: 0.76rem;
+}
+
+.part-empty-message {
+  padding: 12px;
+  color: var(--ink-500);
+  font-size: 0.84rem;
 }
 
 .price-readout {
