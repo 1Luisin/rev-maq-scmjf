@@ -10,7 +10,7 @@ Execute o servidor local e abra `http://localhost:4001`.
 npm start
 ```
 
-O servidor expõe `/api/catalog` para buscar preços atuais na KaBuM! e Magazine Luiza e alimentar a página de montagem.
+O servidor expõe `/api/catalog` para buscar preços atuais na KaBuM!, Magazine Luiza e Microsoft e alimentar a página de montagem.
 Na primeira atualização ele consulta várias páginas públicas dos fornecedores. Depois disso usa cache em memória e em `.cache/catalog.json` por 15 minutos.
 
 ## O que tem no app
@@ -38,7 +38,7 @@ npm start
 
 ## Fontes de preços
 
-Os preços são estimativas obtidas dinamicamente, com links diretos no catálogo. A lista de fornecedores permitidos está limitada a: KaBuM! e Magazine Luiza. Quando esses fornecedores não possuem estoque/preço visível para uma peça, o app marca como sem preço público encontrado. Antes de compra, validar disponibilidade, frete, garantia, nota fiscal, modelo de licenciamento e compatibilidade entre processador, placa-mãe e memória.
+Os preços são estimativas obtidas dinamicamente, com links diretos no catálogo. Peças físicas continuam limitadas a KaBuM! e Magazine Luiza. Sistema operacional usa preço oficial publicado pela Microsoft para Microsoft 365 F3, que inclui Windows Enterprise E3. Antes de compra, validar disponibilidade, frete, garantia, nota fiscal, modelo de licenciamento e compatibilidade entre processador, placa-mãe e memória.
 
 ## Performance da API
 

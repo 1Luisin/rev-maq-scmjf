@@ -121,6 +121,14 @@ if (!elements.get("#catalogRows").innerHTML.includes("KaBuM!")) {
   throw new Error("Allowed supplier offers were not rendered.");
 }
 
+if (!elements.get("#catalogRows").innerHTML.includes("Windows 11 Enterprise E3")) {
+  throw new Error("Windows 11 enterprise license option was not rendered.");
+}
+
+if (!elements.get("#supplierCoverage").innerHTML.includes("Microsoft")) {
+  throw new Error("Microsoft supplier coverage was not rendered.");
+}
+
 if (!elements.get("#supplierCoverage").innerHTML.includes("Magazine Luiza")) {
   throw new Error("Supplier whitelist coverage was not rendered.");
 }

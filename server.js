@@ -13,7 +13,7 @@ const CACHE_DIR = path.join(ROOT, ".cache");
 const CACHE_FILE = path.join(CACHE_DIR, "catalog.json");
 const CACHE_KEY = JSON.stringify({
   maxPages: MAX_PAGES,
-  searchVersion: 2
+  searchVersion: 3
 });
 
 const MIME = {
@@ -36,6 +36,14 @@ const MAGALU_HEADERS = {
   "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
   "accept-language": "pt-BR,pt;q=0.9,en;q=0.8"
 };
+
+const MICROSOFT_HEADERS = {
+  "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36",
+  "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+  "accept-language": "pt-BR,pt;q=0.9,en;q=0.8"
+};
+
+const MICROSOFT_F3_URL = "https://www.microsoft.com/pt-br/microsoft-365/enterprise/f3";
 
 let catalogCache = null;
 let activeFetches = 0;
@@ -155,10 +163,15 @@ async function getDynamicCatalog(refresh) {
   const base = await loadStaticCatalog();
   const supplierStatus = {
     kabum: { label: "KaBuM!", status: "ok" },
-    magalu: { label: "Magazine Luiza", status: "ok" }
+    magalu: { label: "Magazine Luiza", status: "ok" },
+    microsoft: { label: "Microsoft", status: "ok" }
   };
 
   const categoryTasks = base.categories.map((category) => async () => {
+    if (category.id === "license") {
+      return [category.id, await buildMicrosoftLicenseCategory(category, supplierStatus)];
+    }
+
     const config = dynamicCategoryConfig[category.id];
     if (!config) {
       return [category.id, category];
@@ -226,6 +239,59 @@ async function writeDiskCatalogCache(payload) {
   } catch {
     // Cache em disco e uma otimização; falhas aqui nao devem quebrar a API.
   }
+}
+
+async function buildMicrosoftLicenseCategory(category, supplierStatus) {
+  try {
+    const pricing = await fetchMicrosoftF3Pricing();
+    return {
+      ...category,
+      defaultItem: "os-windows-11-enterprise-e3",
+      items: [
+        microsoftWindowsItem("os-windows-10-enterprise-e3", "Windows 10 Enterprise E3", pricing),
+        microsoftWindowsItem("os-windows-11-enterprise-e3", "Windows 11 Enterprise E3", pricing),
+        ...(category.items || []).filter((item) => item.id === "os-none")
+      ]
+    };
+  } catch (error) {
+    supplierStatus.microsoft = { label: "Microsoft", status: "error", message: error.message };
+    return category;
+  }
+}
+
+async function fetchMicrosoftF3Pricing() {
+  const html = await fetchText(MICROSOFT_F3_URL, MICROSOFT_HEADERS);
+  const text = htmlToText(html);
+  const match = text.match(/Microsoft 365 F3\s+R\$\s*([\d.,]+)\s+usu[aá]rio\/m[eê]s/i);
+  if (!match) {
+    throw new Error("Microsoft 365 F3 price not found");
+  }
+
+  return {
+    price: parseBrazilianMoney(match[1]),
+    checkedAt: new Date().toISOString(),
+    sourceUrl: MICROSOFT_F3_URL
+  };
+}
+
+function microsoftWindowsItem(id, name, pricing) {
+  return {
+    id,
+    name,
+    notes: "Preco oficial Microsoft 365 F3 em reais, usuario/mes, pago anualmente. Windows Enterprise E3 e licenciado por usuario.",
+    offers: [
+      {
+        supplier: "microsoft",
+        supplierLabel: "Microsoft",
+        title: `${name} via Microsoft 365 F3`,
+        price: pricing.price,
+        availability: "usuario/mes, pago anualmente",
+        url: pricing.sourceUrl,
+        note: "Windows Enterprise E3 incluido no Microsoft 365 F3",
+        checkedAt: pricing.checkedAt
+      }
+    ]
+  };
 }
 
 async function searchCategory(config, supplierStatus) {
@@ -390,6 +456,27 @@ function extractNextData(html) {
     throw new Error("__NEXT_DATA__ not found");
   }
   return JSON.parse(match[1]);
+}
+
+function htmlToText(html) {
+  return html
+    .replace(/<script[\s\S]*?<\/script>/gi, " ")
+    .replace(/<style[\s\S]*?<\/style>/gi, " ")
+    .replace(/<[^>]+>/g, " ")
+    .replace(/&nbsp;/g, " ")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&amp;/g, "&")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function parseBrazilianMoney(value) {
+  const number = Number(String(value).replace(/\./g, "").replace(",", "."));
+  if (!Number.isFinite(number)) {
+    throw new Error(`Invalid Microsoft price: ${value}`);
+  }
+  return number;
 }
 
 function mergeProducts(products) {

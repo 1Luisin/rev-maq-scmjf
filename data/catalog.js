@@ -15,6 +15,12 @@ window.SCMJF_PARTS_CATALOG = {
         "label": "Magazine Luiza",
         "url": "https://www.magazineluiza.com.br/",
         "searchUrl": "https://www.magazineluiza.com.br/busca/{query}/"
+      },
+      {
+        "id": "microsoft",
+        "label": "Microsoft",
+        "url": "https://www.microsoft.com/pt-br/",
+        "searchUrl": "https://www.microsoft.com/pt-br/search/explore?q={query}"
       }
     ]
   },
@@ -627,14 +633,42 @@ window.SCMJF_PARTS_CATALOG = {
       "id": "license",
       "label": "Sistema operacional",
       "required": false,
-      "defaultItem": "os-no-public-price",
-      "search": "licença Windows 11 Pro fornecedor hospital",
+      "defaultItem": "os-windows-11-enterprise-e3",
+      "search": "Windows Enterprise E3 Microsoft 365 F3",
       "items": [
         {
-          "id": "os-no-public-price",
-          "name": "Licenciamento a validar com contrato institucional",
-          "notes": "Nenhum preço público confiável foi encontrado nos fornecedores permitidos.",
-          "offers": []
+          "id": "os-windows-10-enterprise-e3",
+          "name": "Windows 10 Enterprise E3",
+          "notes": "Preço oficial Microsoft 365 F3 em reais, usuário/mês, pago anualmente.",
+          "offers": [
+            {
+              "supplier": "microsoft",
+              "supplierLabel": "Microsoft",
+              "title": "Windows 10 Enterprise E3 via Microsoft 365 F3",
+              "price": 45.8,
+              "availability": "usuário/mês, pago anualmente",
+              "url": "https://www.microsoft.com/pt-br/microsoft-365/enterprise/f3",
+              "note": "Windows Enterprise E3 incluído no Microsoft 365 F3",
+              "checkedAt": "2026-05-14"
+            }
+          ]
+        },
+        {
+          "id": "os-windows-11-enterprise-e3",
+          "name": "Windows 11 Enterprise E3",
+          "notes": "Preço oficial Microsoft 365 F3 em reais, usuário/mês, pago anualmente.",
+          "offers": [
+            {
+              "supplier": "microsoft",
+              "supplierLabel": "Microsoft",
+              "title": "Windows 11 Enterprise E3 via Microsoft 365 F3",
+              "price": 45.8,
+              "availability": "usuário/mês, pago anualmente",
+              "url": "https://www.microsoft.com/pt-br/microsoft-365/enterprise/f3",
+              "note": "Windows Enterprise E3 incluído no Microsoft 365 F3",
+              "checkedAt": "2026-05-14"
+            }
+          ]
         },
         {
           "id": "os-none",
@@ -694,7 +728,7 @@ window.SCMJF_PARTS_CATALOG = {
         "cables": "cables-none",
         "powerFilter": "filter-none",
         "powerProtection": "nobreak-none",
-        "license": "os-no-public-price"
+        "license": "os-windows-11-enterprise-e3"
       }
     },
     {
@@ -745,7 +779,7 @@ window.SCMJF_PARTS_CATALOG = {
         "cables": "cables-none",
         "powerFilter": "filter-none",
         "powerProtection": "nobreak-none",
-        "license": "os-no-public-price"
+        "license": "os-windows-11-enterprise-e3"
       }
     },
     {
@@ -796,7 +830,7 @@ window.SCMJF_PARTS_CATALOG = {
         "cables": "cables-none",
         "powerFilter": "filter-none",
         "powerProtection": "nobreak-600",
-        "license": "os-no-public-price"
+        "license": "os-windows-11-enterprise-e3"
       }
     }
   ]
