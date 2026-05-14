@@ -85,6 +85,14 @@ if (!resultsHtml.includes("32603_lab01")) {
   throw new Error("Inventory table did not render expected workbook data.");
 }
 
+if (!resultsHtml.includes('data-sort-key="computer"')) {
+  throw new Error("Sortable inventory headers were not rendered.");
+}
+
+if (!elements.get("#statusChart").innerHTML.includes("Abaixo do")) {
+  throw new Error("Filtered status chart was not rendered.");
+}
+
 handlers.click({
   target: {
     closest(selector) {

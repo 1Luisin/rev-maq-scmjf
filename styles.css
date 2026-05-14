@@ -451,13 +451,36 @@ input {
   position: sticky;
   top: 0;
   z-index: 1;
-  padding: 12px 14px;
+  padding: 0;
   color: var(--ink-500);
   background: #fafafa;
   border-bottom: 1px solid var(--line);
   font-size: 0.76rem;
   text-align: left;
   text-transform: uppercase;
+}
+
+.sort-button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+  min-height: 42px;
+  padding: 12px 14px;
+  color: inherit;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 800;
+  text-align: left;
+  text-transform: uppercase;
+}
+
+.sort-button:hover,
+.sort-button.is-active {
+  color: var(--red-800);
 }
 
 .data-table td {
@@ -730,6 +753,10 @@ input {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 18px;
+}
+
+.chart-wide {
+  grid-column: 1 / -1;
 }
 
 .chart-panel,

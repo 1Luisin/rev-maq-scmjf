@@ -61,7 +61,9 @@
       search: "",
       status: "below-min",
       os: "all",
-      includeServers: false
+      includeServers: false,
+      sortKey: "risk",
+      sortDirection: "asc"
     },
     build: {
       profile: "base",
@@ -147,6 +149,20 @@
         state.page = nextPage;
         renderInventoryResults();
       }
+      return;
+    }
+
+    const sortButton = event.target.closest("[data-sort-key]");
+    if (sortButton) {
+      const key = sortButton.dataset.sortKey;
+      if (state.filters.sortKey === key) {
+        state.filters.sortDirection = state.filters.sortDirection === "asc" ? "desc" : "asc";
+      } else {
+        state.filters.sortKey = key;
+        state.filters.sortDirection = "asc";
+      }
+      state.page = 1;
+      renderInventoryResults();
       return;
     }
 
@@ -452,6 +468,10 @@
         </div>
 
         <div class="charts-grid">
+          <section class="chart-panel chart-wide">
+            <h2>SituaÃ§Ã£o do filtro atual</h2>
+            <div id="statusChart"></div>
+          </section>
           <section class="chart-panel">
             <h2>Sistemas operacionais</h2>
             <div id="osChart"></div>
@@ -466,9 +486,6 @@
 
     syncMinimumLabels();
     renderInventoryResults();
-    renderStats();
-    renderDistribution("#osChart", inventory.summary.osDistribution || []);
-    renderDistribution("#ramChart", inventory.summary.ramDistribution || []);
   }
 
   function renderStats() {
@@ -485,6 +502,13 @@
       statCard("Servidores", stats.servers, "Excluídos da troca de desktops"),
       statCard("Custo estimado", formatCurrency(totalForBelow), `Usando montagem atual: ${formatCurrency(unitCost)}/un.`)
     ].join("");
+  }
+
+  function renderInventoryCharts() {
+    const evaluated = getFilteredEvaluatedRows();
+    renderDistribution("#statusChart", getFilteredStatusDistribution(evaluated));
+    renderDistribution("#osChart", getFilteredOsDistribution(evaluated));
+    renderDistribution("#ramChart", getFilteredRamDistribution(evaluated));
   }
 
   function renderInventoryResults() {
@@ -515,13 +539,13 @@
         <table class="data-table">
           <thead>
             <tr>
-              <th>Computador</th>
-              <th>Usuário</th>
-              <th>SO</th>
-              <th>RAM</th>
-              <th>CPU</th>
-              <th>Prioridade</th>
-              <th>Avaliação</th>
+              ${sortableHeader("computer", "Computador")}
+              ${sortableHeader("user", "Usuário")}
+              ${sortableHeader("os", "SO")}
+              ${sortableHeader("ram", "RAM")}
+              ${sortableHeader("cpu", "CPU")}
+              ${sortableHeader("priority", "Prioridade")}
+              ${sortableHeader("evaluation", "Avaliação")}
             </tr>
           </thead>
           <tbody>
@@ -534,6 +558,7 @@
     `;
 
     renderStats();
+    renderInventoryCharts();
   }
 
   function renderBuilderView() {
@@ -806,7 +831,45 @@
         }
       });
 
-    return filtered.sort(sortByRisk);
+    return sortEvaluatedRows(filtered);
+  }
+
+  function sortEvaluatedRows(items) {
+    const key = state.filters.sortKey || "risk";
+    const direction = state.filters.sortDirection === "desc" ? -1 : 1;
+
+    return [...items].sort((a, b) => {
+      const result = compareSortValues(sortValue(a, key), sortValue(b, key));
+      if (result !== 0) return result * direction;
+      return sortByRisk(a, b);
+    });
+  }
+
+  function sortValue(item, key) {
+    switch (key) {
+      case "computer":
+        return item.row.computador || "";
+      case "user":
+        return item.row.usuario || "";
+      case "os":
+        return item.row.sistemaOperacional || "";
+      case "ram":
+        return Number(item.row.ramGb || 0);
+      case "cpu":
+        return Number(item.row.cpuMhz || 0);
+      case "priority":
+        return priorityRank(item.row.prioridade);
+      case "evaluation":
+      case "risk":
+        return evaluationRank(item);
+      default:
+        return "";
+    }
+  }
+
+  function compareSortValues(a, b) {
+    if (typeof a === "number" && typeof b === "number") return a - b;
+    return String(a).localeCompare(String(b), "pt-BR", { numeric: true, sensitivity: "base" });
   }
 
   function evaluateHardware(row) {
@@ -847,21 +910,30 @@
   }
 
   function sortByRisk(a, b) {
-    const aRisk = a.evaluation.meets ? 1 : 0;
-    const bRisk = b.evaluation.meets ? 1 : 0;
+    const aRisk = evaluationRank(a);
+    const bRisk = evaluationRank(b);
     if (aRisk !== bRisk) return aRisk - bRisk;
 
+    const aPriority = priorityRank(a.row.prioridade);
+    const bPriority = priorityRank(b.row.prioridade);
+    if (aPriority !== bPriority) return aPriority - bPriority;
+
+    return Number(a.row.ramGb || 0) - Number(b.row.ramGb || 0);
+  }
+
+  function evaluationRank(item) {
+    if (item.evaluation.server) return 3;
+    return item.evaluation.meets ? 1 : 0;
+  }
+
+  function priorityRank(priorityName) {
     const priority = {
       "Troca imediata": 0,
       "Troca recomendada": 1,
       "Manter / avaliar futuramente": 2,
       "Servidor - excluído": 3
     };
-    const aPriority = priority[a.row.prioridade] ?? 9;
-    const bPriority = priority[b.row.prioridade] ?? 9;
-    if (aPriority !== bPriority) return aPriority - bPriority;
-
-    return Number(a.row.ramGb || 0) - Number(b.row.ramGb || 0);
+    return priority[priorityName] ?? 9;
   }
 
   function getBuildSubtotal() {
@@ -1198,6 +1270,22 @@
     `;
   }
 
+  function sortableHeader(key, label) {
+    const active = state.filters.sortKey === key;
+    const direction = active ? state.filters.sortDirection : "none";
+    const icon = !active ? "↕" : direction === "asc" ? "↑" : "↓";
+    const title = !active ? `Ordenar por ${label}` : `Ordenado ${direction === "asc" ? "crescente" : "decrescente"}`;
+
+    return `
+      <th>
+        <button class="sort-button ${active ? "is-active" : ""}" type="button" data-sort-key="${key}" title="${escapeAttr(title)}">
+          <span>${escapeHtml(label)}</span>
+          <span aria-hidden="true">${icon}</span>
+        </button>
+      </th>
+    `;
+  }
+
   function renderDistribution(selector, data) {
     const target = document.querySelector(selector);
     if (!target) return;
@@ -1220,6 +1308,61 @@
         }).join("")}
       </div>
     `;
+  }
+
+  function getFilteredStatusDistribution(items) {
+    const workstations = items.filter(({ row }) => !isServer(row));
+    const belowMinimum = workstations.filter(({ evaluation }) => !evaluation.meets).length;
+    const meetsMinimum = workstations.length - belowMinimum;
+    const oldWindows = workstations.filter(({ row }) => {
+      const major = getWindowsMajor(row.sistemaOperacional);
+      return major > 0 && major < 10;
+    }).length;
+
+    return [
+      { label: "Abaixo do mínimo", quantity: belowMinimum },
+      { label: "No mínimo", quantity: meetsMinimum },
+      { label: "Com Windows antigo", quantity: oldWindows }
+    ];
+  }
+
+  function getFilteredOsDistribution(items) {
+    return toDistribution(items, ({ row }) => row.sistemaOperacional || "Não informado");
+  }
+
+  function getFilteredRamDistribution(items) {
+    return toDistribution(items, ({ row }) => ramBucket(Number(row.ramGb || 0)), [
+      "Abaixo de 4 GB",
+      "4 GB",
+      "Entre 5 e 7 GB",
+      "8 a 11 GB",
+      "12 GB ou mais"
+    ]);
+  }
+
+  function toDistribution(items, getLabel, preferredOrder = null) {
+    const counts = items.reduce((accumulator, item) => {
+      const label = getLabel(item);
+      accumulator[label] = (accumulator[label] || 0) + 1;
+      return accumulator;
+    }, {});
+
+    const entries = Object.entries(counts).map(([label, quantity]) => ({ label, quantity }));
+    if (!preferredOrder) {
+      return entries.sort((a, b) => b.quantity - a.quantity || a.label.localeCompare(b.label, "pt-BR"));
+    }
+
+    return preferredOrder
+      .filter((label) => counts[label])
+      .map((label) => ({ label, quantity: counts[label] }));
+  }
+
+  function ramBucket(ramGb) {
+    if (ramGb < 4) return "Abaixo de 4 GB";
+    if (ramGb === 4) return "4 GB";
+    if (ramGb >= 5 && ramGb <= 7) return "Entre 5 e 7 GB";
+    if (ramGb >= 8 && ramGb <= 11) return "8 a 11 GB";
+    return "12 GB ou mais";
   }
 
   function statCard(label, value, detail) {
