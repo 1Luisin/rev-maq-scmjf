@@ -85,6 +85,8 @@
   document.addEventListener("change", handleChange);
   document.addEventListener("input", handleInput);
   document.addEventListener("keydown", handleKeydown);
+  document.addEventListener("focusin", handleFocusIn);
+  document.addEventListener("wheel", handleWheel, { passive: false });
 
   render();
 
@@ -123,6 +125,13 @@
   }
 
   function handleClick(event) {
+    const picker = event.target.closest?.(".part-picker");
+    if (picker) {
+      openPartPicker(picker);
+    } else if (!event.target.closest?.("[data-cpu-vendor]")) {
+      closePartPickers();
+    }
+
     const navButton = event.target.closest("[data-view]");
     if (navButton) {
       state.view = navButton.dataset.view;
@@ -305,7 +314,14 @@
 
     if (target.dataset.partQuery) {
       state.build.partQueries[target.dataset.partQuery] = target.value;
+      openPartPicker(target.closest(".part-picker"));
       filterPartPicker(target);
+    }
+  }
+
+  function handleFocusIn(event) {
+    if (event.target.dataset?.partQuery) {
+      openPartPicker(event.target.closest(".part-picker"));
     }
   }
 
@@ -319,6 +335,27 @@
 
     event.preventDefault();
     firstVisible.click();
+  }
+
+  function handleWheel(event) {
+    const list = event.target.closest?.(".part-option-list");
+    if (!list) return;
+
+    event.preventDefault();
+    event.stopPropagation();
+    list.scrollTop += event.deltaY;
+  }
+
+  function openPartPicker(picker) {
+    if (!picker) return;
+    closePartPickers(picker);
+    picker.classList.add("is-open");
+  }
+
+  function closePartPickers(except = null) {
+    document.querySelectorAll(".part-picker.is-open").forEach((picker) => {
+      if (picker !== except) picker.classList.remove("is-open");
+    });
   }
 
   function render() {

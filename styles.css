@@ -560,16 +560,19 @@ input {
   display: none;
   max-height: 240px;
   overflow-y: auto;
+  overflow-x: hidden;
   overscroll-behavior: contain;
   scrollbar-gutter: stable;
+  touch-action: pan-y;
   background: #ffffff;
   border: 1px solid var(--line);
   border-radius: 8px;
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.5);
 }
 
+.part-picker.is-open .part-option-list,
 .part-picker:focus-within .part-option-list {
-  display: grid;
+  display: block;
 }
 
 .part-option {
