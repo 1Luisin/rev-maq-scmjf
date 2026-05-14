@@ -11,6 +11,7 @@ npm start
 ```
 
 O servidor expõe `/api/catalog` para buscar preços atuais na KaBuM! e Magazine Luiza e alimentar a página de montagem.
+Na primeira atualização ele consulta várias páginas públicas dos fornecedores. Depois disso usa cache em memória e em `.cache/catalog.json` por 15 minutos.
 
 ## O que tem no app
 
@@ -37,4 +38,13 @@ npm start
 
 ## Fontes de preços
 
-Os preços são estimativas editáveis, com links diretos no catálogo. A lista de fornecedores permitidos está limitada a: KaBuM! e Magazine Luiza. Quando esses fornecedores não possuem estoque/preço visível para uma peça, o app marca como sem preço público encontrado. Antes de compra, validar disponibilidade, frete, garantia, nota fiscal, modelo de licenciamento e compatibilidade entre processador, placa-mãe e memória.
+Os preços são estimativas obtidas dinamicamente, com links diretos no catálogo. A lista de fornecedores permitidos está limitada a: KaBuM! e Magazine Luiza. Quando esses fornecedores não possuem estoque/preço visível para uma peça, o app marca como sem preço público encontrado. Antes de compra, validar disponibilidade, frete, garantia, nota fiscal, modelo de licenciamento e compatibilidade entre processador, placa-mãe e memória.
+
+## Performance da API
+
+Variáveis úteis:
+
+- `SCMJF_CACHE_TTL_MS`: tempo do cache, padrão 15 minutos.
+- `SCMJF_FETCH_CONCURRENCY`: requisições simultâneas aos fornecedores, padrão 12.
+- `SCMJF_MAX_CONCURRENCY`: tarefas internas simultâneas, padrão 8.
+- `SCMJF_MAX_PAGES`: limite opcional de páginas por busca; `0` busca todas as páginas encontradas.

@@ -7,7 +7,14 @@ const ROOT = __dirname;
 const PORT = Number(process.env.PORT || 4001);
 const CACHE_TTL_MS = Number(process.env.SCMJF_CACHE_TTL_MS || 15 * 60 * 1000);
 const MAX_PAGES = Number(process.env.SCMJF_MAX_PAGES || 0);
-const MAX_CONCURRENCY = Number(process.env.SCMJF_MAX_CONCURRENCY || 5);
+const MAX_CONCURRENCY = Number(process.env.SCMJF_MAX_CONCURRENCY || 8);
+const FETCH_CONCURRENCY = Number(process.env.SCMJF_FETCH_CONCURRENCY || 12);
+const CACHE_DIR = path.join(ROOT, ".cache");
+const CACHE_FILE = path.join(CACHE_DIR, "catalog.json");
+const CACHE_KEY = JSON.stringify({
+  maxPages: MAX_PAGES,
+  searchVersion: 2
+});
 
 const MIME = {
   ".html": "text/html; charset=utf-8",
@@ -31,6 +38,8 @@ const MAGALU_HEADERS = {
 };
 
 let catalogCache = null;
+let activeFetches = 0;
+const fetchQueue = [];
 
 const dynamicCategoryConfig = {
   cpu: {
@@ -130,22 +139,29 @@ function sendJson(res, payload, status = 200) {
 
 async function getDynamicCatalog(refresh) {
   const now = Date.now();
-  if (!refresh && catalogCache && now - catalogCache.createdAt < CACHE_TTL_MS) {
+  if (!refresh && catalogCache && catalogCache.cacheKey === CACHE_KEY && now - catalogCache.createdAt < CACHE_TTL_MS) {
     return catalogCache.catalog;
   }
 
+  if (!refresh) {
+    const diskCache = await readDiskCatalogCache(now);
+    if (diskCache) {
+      catalogCache = diskCache;
+      return diskCache.catalog;
+    }
+  }
+
+  const startedAt = Date.now();
   const base = await loadStaticCatalog();
   const supplierStatus = {
     kabum: { label: "KaBuM!", status: "ok" },
     magalu: { label: "Magazine Luiza", status: "ok" }
   };
 
-  const dynamicCategories = {};
-  for (const category of base.categories) {
+  const categoryTasks = base.categories.map((category) => async () => {
     const config = dynamicCategoryConfig[category.id];
     if (!config) {
-      dynamicCategories[category.id] = category;
-      continue;
+      return [category.id, category];
     }
 
     const products = await searchCategory(config, supplierStatus);
@@ -155,12 +171,14 @@ async function getDynamicCatalog(refresh) {
       .filter((item) => item.offers.length > 0)
       .sort(sortItemsByBestPrice);
 
-    dynamicCategories[category.id] = {
+    return [category.id, {
       ...category,
       items,
       defaultItem: items[0]?.id || category.defaultItem
-    };
-  }
+    }];
+  });
+
+  const dynamicCategories = Object.fromEntries(await runLimited(categoryTasks));
 
   base.categories = base.categories.map((category) => dynamicCategories[category.id] || category);
   reconcileProfiles(base);
@@ -170,10 +188,13 @@ async function getDynamicCatalog(refresh) {
     generatedAt: new Date().toISOString(),
     cacheTtlMs: CACHE_TTL_MS,
     maxPagesPerSearch: MAX_PAGES > 0 ? MAX_PAGES : "all",
+    generationMs: Date.now() - startedAt,
+    fetchConcurrency: FETCH_CONCURRENCY,
     supplierStatus
   };
 
-  catalogCache = { createdAt: now, catalog: base };
+  catalogCache = { createdAt: now, cacheKey: CACHE_KEY, catalog: base };
+  await writeDiskCatalogCache(catalogCache);
   return base;
 }
 
@@ -183,6 +204,28 @@ async function loadStaticCatalog() {
   vm.createContext(context);
   vm.runInContext(source, context);
   return JSON.parse(JSON.stringify(context.window.SCMJF_PARTS_CATALOG));
+}
+
+async function readDiskCatalogCache(now) {
+  try {
+    const raw = await fs.readFile(CACHE_FILE, "utf8");
+    const cached = JSON.parse(raw);
+    if (!cached?.catalog || !cached.createdAt) return null;
+    if (cached.cacheKey !== CACHE_KEY) return null;
+    if (now - Number(cached.createdAt) > CACHE_TTL_MS) return null;
+    return cached;
+  } catch {
+    return null;
+  }
+}
+
+async function writeDiskCatalogCache(payload) {
+  try {
+    await fs.mkdir(CACHE_DIR, { recursive: true });
+    await fs.writeFile(CACHE_FILE, JSON.stringify(payload), "utf8");
+  } catch {
+    // Cache em disco e uma otimização; falhas aqui nao devem quebrar a API.
+  }
 }
 
 async function searchCategory(config, supplierStatus) {
@@ -224,9 +267,11 @@ async function searchKabum(query) {
   const totalPages = getPageLimit(first.totalPages || 1);
   const pages = [first.products];
 
+  const pageTasks = [];
   for (let page = 2; page <= totalPages; page += 1) {
-    pages.push((await fetchKabumPage(query, page)).products);
+    pageTasks.push(() => fetchKabumPage(query, page).then((result) => result.products));
   }
+  pages.push(...await runLimited(pageTasks));
 
   return pages.flat();
 }
@@ -265,9 +310,11 @@ async function searchMagalu(query) {
   const totalPages = getPageLimit(first.totalPages || 1);
   const pages = [first.products];
 
+  const pageTasks = [];
   for (let page = 2; page <= totalPages; page += 1) {
-    pages.push((await fetchMagaluPage(query, page)).products);
+    pageTasks.push(() => fetchMagaluPage(query, page).then((result) => result.products));
   }
+  pages.push(...await runLimited(pageTasks));
 
   return pages.flat();
 }
@@ -307,16 +354,33 @@ async function fetchMagaluPage(query, page) {
 }
 
 async function fetchText(url, headers) {
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 30000);
-  try {
-    const response = await fetch(url, { headers, signal: controller.signal });
-    if (!response.ok) {
-      throw new Error(`${response.status} ${response.statusText}`);
+  return withFetchSlot(async () => {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 30000);
+    try {
+      const response = await fetch(url, { headers, signal: controller.signal });
+      if (!response.ok) {
+        throw new Error(`${response.status} ${response.statusText}`);
+      }
+      return await response.text();
+    } finally {
+      clearTimeout(timeout);
     }
-    return await response.text();
+  });
+}
+
+async function withFetchSlot(callback) {
+  if (activeFetches >= FETCH_CONCURRENCY) {
+    await new Promise((resolve) => fetchQueue.push(resolve));
+  }
+
+  activeFetches += 1;
+  try {
+    return await callback();
   } finally {
-    clearTimeout(timeout);
+    activeFetches -= 1;
+    const next = fetchQueue.shift();
+    if (next) next();
   }
 }
 
