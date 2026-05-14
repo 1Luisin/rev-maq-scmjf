@@ -89,8 +89,32 @@ if (!resultsHtml.includes('data-sort-key="computer"')) {
   throw new Error("Sortable inventory headers were not rendered.");
 }
 
-if (!elements.get("#statusChart").innerHTML.includes("Abaixo do")) {
+const statusChartHtml = elements.get("#statusChart").innerHTML;
+if (!statusChartHtml.includes("Abaixo do")) {
   throw new Error("Filtered status chart was not rendered.");
+}
+
+if (/No m[^<]*<\/span>\s*<strong>0<\/strong>/.test(statusChartHtml)) {
+  throw new Error("Status chart should not be constrained by the status filter itself.");
+}
+
+const computerSortEvent = {
+  target: {
+    closest(selector) {
+      return selector === "[data-sort-key]" ? { dataset: { sortKey: "computer" } } : null;
+    }
+  }
+};
+
+handlers.click(computerSortEvent);
+if (!elements.get("#inventoryResults").innerHTML.includes('sort-button is-active" type="button" data-sort-key="computer"')) {
+  throw new Error("Computer sort did not become active.");
+}
+
+handlers.click(computerSortEvent);
+handlers.click(computerSortEvent);
+if (elements.get("#inventoryResults").innerHTML.includes('sort-button is-active" type="button" data-sort-key="computer"')) {
+  throw new Error("Sort cycle should reset to the default state after ascending and descending.");
 }
 
 handlers.click({

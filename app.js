@@ -154,13 +154,7 @@
 
     const sortButton = event.target.closest("[data-sort-key]");
     if (sortButton) {
-      const key = sortButton.dataset.sortKey;
-      if (state.filters.sortKey === key) {
-        state.filters.sortDirection = state.filters.sortDirection === "asc" ? "desc" : "asc";
-      } else {
-        state.filters.sortKey = key;
-        state.filters.sortDirection = "asc";
-      }
+      cycleInventorySort(sortButton.dataset.sortKey);
       state.page = 1;
       renderInventoryResults();
       return;
@@ -469,7 +463,7 @@
 
         <div class="charts-grid">
           <section class="chart-panel chart-wide">
-            <h2>SituaÃ§Ã£o do filtro atual</h2>
+            <h2>Situa&ccedil;&atilde;o do filtro atual</h2>
             <div id="statusChart"></div>
           </section>
           <section class="chart-panel">
@@ -505,8 +499,9 @@
   }
 
   function renderInventoryCharts() {
-    const evaluated = getFilteredEvaluatedRows();
-    renderDistribution("#statusChart", getFilteredStatusDistribution(evaluated));
+    const evaluated = getFilteredEvaluatedRows({ sort: false });
+    const statusEvaluated = getFilteredEvaluatedRows({ ignoreStatus: true, sort: false });
+    renderDistribution("#statusChart", getFilteredStatusDistribution(statusEvaluated));
     renderDistribution("#osChart", getFilteredOsDistribution(evaluated));
     renderDistribution("#ramChart", getFilteredRamDistribution(evaluated));
   }
@@ -787,7 +782,8 @@
     };
   }
 
-  function getFilteredEvaluatedRows() {
+  function getFilteredEvaluatedRows(options = {}) {
+    const { ignoreStatus = false, sort = true } = options;
     const search = normalize(state.filters.search);
     const filtered = rows
       .map((row) => ({ row, evaluation: evaluateHardware(row) }))
@@ -806,6 +802,8 @@
           ].join(" "));
           if (!haystack.includes(search)) return false;
         }
+
+        if (ignoreStatus) return true;
 
         switch (state.filters.status) {
           case "below-min":
@@ -831,7 +829,25 @@
         }
       });
 
-    return sortEvaluatedRows(filtered);
+    return sort ? sortEvaluatedRows(filtered) : filtered;
+  }
+
+  function cycleInventorySort(key) {
+    if (!key) return;
+
+    if (state.filters.sortKey !== key) {
+      state.filters.sortKey = key;
+      state.filters.sortDirection = "asc";
+      return;
+    }
+
+    if (state.filters.sortDirection === "asc") {
+      state.filters.sortDirection = "desc";
+      return;
+    }
+
+    state.filters.sortKey = "risk";
+    state.filters.sortDirection = "asc";
   }
 
   function sortEvaluatedRows(items) {
@@ -860,6 +876,7 @@
       case "priority":
         return priorityRank(item.row.prioridade);
       case "evaluation":
+        return evaluationSortText(item);
       case "risk":
         return evaluationRank(item);
       default:
@@ -924,6 +941,16 @@
   function evaluationRank(item) {
     if (item.evaluation.server) return 3;
     return item.evaluation.meets ? 1 : 0;
+  }
+
+  function evaluationSortText(item) {
+    const label = item.evaluation.server
+      ? "Servidor"
+      : item.evaluation.meets
+        ? "Dentro do mínimo"
+        : "Abaixo do mínimo";
+
+    return `${label} ${item.evaluation.reasons.join(" ")}`;
   }
 
   function priorityRank(priorityName) {
