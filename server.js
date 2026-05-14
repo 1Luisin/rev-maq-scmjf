@@ -38,10 +38,14 @@ const dynamicCategoryConfig = {
       "processador ryzen",
       "processador amd",
       "processador intel",
-      "processador intel core i3",
-      "processador intel core i5",
-      "processador intel core i7",
-      "processador intel core i9"
+      "intel i3 processador",
+      "intel i5 processador",
+      "intel i7 processador",
+      "intel i9 processador",
+      "core i3 processador",
+      "core i5 processador",
+      "core i7 processador",
+      "core i9 processador"
     ],
     filter: isCpuProduct,
     enrich: enrichCpu
@@ -375,7 +379,7 @@ function normalizeText(value) {
 
 function isCpuProduct(item) {
   const name = normalizeText(item.name);
-  if (!name.includes("processador")) return false;
+  if (!/^processador\b/.test(name)) return false;
   if (!/(ryzen|amd|intel|core i[3579]|core ultra|pentium|celeron|athlon|xeon)/.test(name)) return false;
   if (/(cooler|water cooler|air cooler|adaptador|contact frame|suporte|kit|placa[- ]?mae|motherboard|notebook|computador|pc gamer|desktop completo)/.test(name)) return false;
   return bestPrice(item) >= 120;

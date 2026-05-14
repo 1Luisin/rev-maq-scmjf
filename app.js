@@ -994,8 +994,12 @@
   }
 
   function renderPartPicker(category, items, selected) {
-    const query = state.build.partQueries[category.id] ?? selected?.name ?? "";
+    const query = state.build.partQueries[category.id] ?? "";
+    const terms = normalize(query).split(/\s+/).filter(Boolean);
     const selectedId = selected?.id || "";
+    const visibleItems = terms.length
+      ? items.filter((item) => terms.every((term) => normalize(item.name).includes(term)))
+      : items;
 
     if (!items.length) {
       return `
@@ -1017,10 +1021,11 @@
           placeholder="Digite para buscar ${escapeAttr(category.label.toLowerCase())}"
           autocomplete="off"
         >
-        <div class="part-picker-count" data-picker-count="${category.id}">${formatNumber(items.length)} opções disponíveis</div>
+        <div class="part-picker-count" data-picker-count="${category.id}">${formatNumber(visibleItems.length)} de ${formatNumber(items.length)} opções</div>
         <div class="part-option-list" role="listbox">
           ${items.map((item) => {
             const offer = getBestOffer(item);
+            const hidden = terms.length && !terms.every((term) => normalize(item.name).includes(term));
             return `
               <button
                 class="part-option ${item.id === selectedId ? "is-selected" : ""}"
@@ -1028,6 +1033,7 @@
                 data-part-choice="${category.id}"
                 data-item-id="${escapeAttr(item.id)}"
                 data-search="${escapeAttr(normalize(item.name))}"
+                ${hidden ? "hidden" : ""}
               >
                 <span>${escapeHtml(item.name)}</span>
                 <small>${offer ? `${formatCurrency(offer.price)} - ${escapeHtml(offer.supplierLabel)}` : "Sem preço público"}</small>
