@@ -544,9 +544,11 @@ input {
 }
 
 .parts-table thead .table-heading-text {
+  justify-content: center;
   min-height: 54px;
   padding: 16px 20px;
   color: var(--ink-900);
+  text-align: center;
 }
 
 .parts-table td {
