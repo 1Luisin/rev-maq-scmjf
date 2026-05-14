@@ -89,6 +89,10 @@ if (!resultsHtml.includes('data-sort-key="computer"')) {
   throw new Error("Sortable inventory headers were not rendered.");
 }
 
+if (resultsHtml.includes('data-sort-key="evaluation"')) {
+  throw new Error("Evaluation column should not be sortable.");
+}
+
 const statusChartHtml = elements.get("#statusChart").innerHTML;
 if (!statusChartHtml.includes("Abaixo do")) {
   throw new Error("Filtered status chart was not rendered.");

@@ -540,7 +540,7 @@
               ${sortableHeader("ram", "RAM")}
               ${sortableHeader("cpu", "CPU")}
               ${sortableHeader("priority", "Prioridade")}
-              ${sortableHeader("evaluation", "Avaliação")}
+              ${plainHeader("Avaliação")}
             </tr>
           </thead>
           <tbody>
@@ -666,10 +666,10 @@
         <table class="data-table parts-table">
           <thead>
             <tr>
-              <th>Categoria</th>
-              <th>Peça</th>
-              <th>Preço</th>
-              <th>Fonte</th>
+              ${plainHeader("Categoria")}
+              ${plainHeader("Peça")}
+              ${plainHeader("Preço")}
+              ${plainHeader("Fonte")}
             </tr>
           </thead>
           <tbody>
@@ -875,8 +875,6 @@
         return Number(item.row.cpuMhz || 0);
       case "priority":
         return priorityRank(item.row.prioridade);
-      case "evaluation":
-        return evaluationSortText(item);
       case "risk":
         return evaluationRank(item);
       default:
@@ -941,16 +939,6 @@
   function evaluationRank(item) {
     if (item.evaluation.server) return 3;
     return item.evaluation.meets ? 1 : 0;
-  }
-
-  function evaluationSortText(item) {
-    const label = item.evaluation.server
-      ? "Servidor"
-      : item.evaluation.meets
-        ? "Dentro do mínimo"
-        : "Abaixo do mínimo";
-
-    return `${label} ${item.evaluation.reasons.join(" ")}`;
   }
 
   function priorityRank(priorityName) {
@@ -1309,6 +1297,14 @@
           <span>${escapeHtml(label)}</span>
           <span aria-hidden="true">${icon}</span>
         </button>
+      </th>
+    `;
+  }
+
+  function plainHeader(label) {
+    return `
+      <th>
+        <span class="table-heading-text">${escapeHtml(label)}</span>
       </th>
     `;
   }

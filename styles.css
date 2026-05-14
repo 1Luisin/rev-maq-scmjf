@@ -452,11 +452,21 @@ input {
   top: 0;
   z-index: 1;
   padding: 0;
-  color: var(--ink-500);
-  background: #fafafa;
+  color: var(--ink-700);
+  background: #f5f7fa;
   border-bottom: 1px solid var(--line);
-  font-size: 0.76rem;
+  font-size: 0.78rem;
   text-align: left;
+  text-transform: uppercase;
+}
+
+.table-heading-text {
+  display: flex;
+  align-items: center;
+  min-height: 48px;
+  padding: 14px 16px;
+  color: var(--ink-700);
+  font-weight: 850;
   text-transform: uppercase;
 }
 
@@ -513,7 +523,53 @@ input {
 }
 
 .parts-table {
-  min-width: 980px;
+  min-width: 1040px;
+  border-collapse: separate;
+  border-spacing: 0 12px;
+}
+
+.parts-table thead th {
+  background: #eef2f6;
+  border-bottom: 1px solid #d9dee7;
+}
+
+.parts-table thead th:first-child {
+  border-top-left-radius: 8px;
+  border-bottom-left-radius: 8px;
+}
+
+.parts-table thead th:last-child {
+  border-top-right-radius: 8px;
+  border-bottom-right-radius: 8px;
+}
+
+.parts-table thead .table-heading-text {
+  min-height: 54px;
+  padding: 16px 20px;
+  color: var(--ink-900);
+}
+
+.parts-table td {
+  padding: 20px;
+  background: #ffffff;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+}
+
+.parts-table td:first-child {
+  border-left: 1px solid var(--line);
+  border-top-left-radius: 8px;
+  border-bottom-left-radius: 8px;
+}
+
+.parts-table td:last-child {
+  border-right: 1px solid var(--line);
+  border-top-right-radius: 8px;
+  border-bottom-right-radius: 8px;
+}
+
+.parts-table tr:hover td {
+  background: #fffafb;
 }
 
 .parts-table td:nth-child(2) {
@@ -565,7 +621,7 @@ input {
 
 .part-picker {
   display: grid;
-  gap: 6px;
+  gap: 8px;
   max-width: 100%;
 }
 
@@ -582,6 +638,7 @@ input {
 .part-option-list {
   display: none;
   max-height: 240px;
+  padding: 8px;
   overflow-y: auto;
   overflow-x: hidden;
   overscroll-behavior: contain;
@@ -602,13 +659,17 @@ input {
   display: grid;
   gap: 4px;
   width: 100%;
-  padding: 10px 12px;
+  padding: 12px 14px;
   color: var(--ink-800);
   background: #ffffff;
-  border: 0;
-  border-bottom: 1px solid var(--line);
+  border: 1px solid transparent;
+  border-radius: 8px;
   cursor: pointer;
   text-align: left;
+}
+
+.part-option + .part-option {
+  margin-top: 6px;
 }
 
 .part-option[hidden],
@@ -617,13 +678,10 @@ input {
   display: none !important;
 }
 
-.part-option:last-child {
-  border-bottom: 0;
-}
-
 .part-option:hover,
 .part-option.is-selected {
   background: #fff8f9;
+  border-color: #f0c6cc;
 }
 
 .part-option span {
