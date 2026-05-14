@@ -649,7 +649,7 @@ window.SCMJF_PARTS_CATALOG = {
     {
       "id": "base",
       "label": "Base Santa Casa",
-      "description": "Estação administrativa com CPU, placa-mãe, 16 GB, SSD, fonte, gabinete e cooler.",
+      "description": "Estação administrativa com CPU, placa-mãe, memória, SSD, fonte, gabinete e cooler.",
       "included": {
         "cpu": true,
         "motherboard": true,
@@ -700,7 +700,7 @@ window.SCMJF_PARTS_CATALOG = {
     {
       "id": "complete",
       "label": "Estação completa",
-      "description": "Inclui monitor, teclado, mouse, filtro de linha e cabos básicos.",
+      "description": "Inclui monitor básico, teclado, mouse, filtro de linha e cabos básicos.",
       "included": {
         "cpu": true,
         "motherboard": true,
@@ -751,7 +751,7 @@ window.SCMJF_PARTS_CATALOG = {
     {
       "id": "performance",
       "label": "Setor pesado",
-      "description": "32 GB, SSD NVMe, monitor maior, nobreak e acessórios de suporte.",
+      "description": "Inclui Placa de vídeo, mais memória, SSD NVMe, monitor maior, nobreak e acessórios de suporte.",
       "included": {
         "cpu": true,
         "motherboard": true,

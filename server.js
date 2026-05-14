@@ -4,7 +4,7 @@ const path = require("node:path");
 const vm = require("node:vm");
 
 const ROOT = __dirname;
-const PORT = Number(process.env.PORT || 4173);
+const PORT = Number(process.env.PORT || 4001);
 const CACHE_TTL_MS = Number(process.env.SCMJF_CACHE_TTL_MS || 15 * 60 * 1000);
 const MAX_PAGES = Number(process.env.SCMJF_MAX_PAGES || 0);
 const MAX_CONCURRENCY = Number(process.env.SCMJF_MAX_CONCURRENCY || 5);

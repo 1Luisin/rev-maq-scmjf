@@ -4,7 +4,7 @@ Aplicativo web para análise da planilha `triagem_troca_computadores_santa_casa.
 
 ## Como abrir
 
-Execute o servidor local e abra `http://localhost:4173`.
+Execute o servidor local e abra `http://localhost:4001`.
 
 ```powershell
 npm start

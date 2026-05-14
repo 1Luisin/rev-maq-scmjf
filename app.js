@@ -19,13 +19,13 @@
   const decimal = new Intl.NumberFormat("pt-BR", { maximumFractionDigits: 1 });
 
   const minimumProfiles = [
-    {
+    /*{
       id: "original",
       label: "Corte original da planilha",
       ramGb: 4,
       cpuMhz: 0,
       windowsMajor: 10
-    },
+    }*/
     {
       id: "operational",
       label: "Mínimo operacional",
