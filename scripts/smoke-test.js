@@ -101,6 +101,22 @@ if (!elements.get("#catalogRows").innerHTML.includes("Processador")) {
   throw new Error("Parts catalog was not rendered.");
 }
 
+if (!elements.get("#catalogRows").innerHTML.includes('data-cpu-vendor="intel"')) {
+  throw new Error("CPU vendor filter was not rendered.");
+}
+
+if (!elements.get("#catalogRows").innerHTML.includes("part-search-input")) {
+  throw new Error("Searchable part picker was not rendered.");
+}
+
+if (elements.get("#catalogRows").innerHTML.includes("data-price-override")) {
+  throw new Error("Editable price override should not be rendered.");
+}
+
+if (elements.get("#catalogRows").innerHTML.includes("data-part-select")) {
+  throw new Error("Native part select should not be rendered.");
+}
+
 if (!elements.get("#catalogRows").innerHTML.includes("KaBuM!")) {
   throw new Error("Allowed supplier offers were not rendered.");
 }

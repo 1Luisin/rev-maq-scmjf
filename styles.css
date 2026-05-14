@@ -328,8 +328,7 @@ input {
 
 .field input,
 .field select,
-.parts-table select,
-.price-input {
+.part-search-input {
   width: 100%;
   min-height: 42px;
   padding: 0 12px;
@@ -341,8 +340,7 @@ input {
 
 .field input:focus,
 .field select:focus,
-.parts-table select:focus,
-.price-input:focus,
+.part-search-input:focus,
 .button:focus-visible,
 .nav-button:focus-visible {
   border-color: var(--red-600);
@@ -508,8 +506,112 @@ input {
   background: #fafafa;
 }
 
-.price-input {
-  max-width: 150px;
+.segmented {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px;
+  background: #f2f3f5;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+
+.segmented button {
+  min-height: 32px;
+  padding: 0 10px;
+  color: var(--ink-700);
+  background: transparent;
+  border: 0;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 750;
+}
+
+.segmented button:hover {
+  color: var(--red-800);
+}
+
+.segmented button.is-active {
+  color: #ffffff;
+  background: var(--red-700);
+}
+
+.part-segmented {
+  margin-bottom: 8px;
+}
+
+.part-picker {
+  display: grid;
+  gap: 6px;
+  max-width: 100%;
+}
+
+.part-search-input {
+  border-radius: 8px;
+}
+
+.part-picker-count {
+  color: var(--ink-500);
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.part-option-list {
+  display: none;
+  max-height: 240px;
+  overflow-y: auto;
+  background: #ffffff;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.5);
+}
+
+.part-picker:focus-within .part-option-list {
+  display: grid;
+}
+
+.part-option {
+  display: grid;
+  gap: 4px;
+  width: 100%;
+  padding: 10px 12px;
+  color: var(--ink-800);
+  background: #ffffff;
+  border: 0;
+  border-bottom: 1px solid var(--line);
+  cursor: pointer;
+  text-align: left;
+}
+
+.part-option:last-child {
+  border-bottom: 0;
+}
+
+.part-option:hover,
+.part-option.is-selected {
+  background: #fff8f9;
+}
+
+.part-option span {
+  overflow-wrap: anywhere;
+  line-height: 1.25;
+}
+
+.part-option small {
+  margin: 0;
+  color: var(--ink-500);
+  font-size: 0.76rem;
+}
+
+.price-readout {
+  display: grid;
+  gap: 4px;
+  min-width: 132px;
+}
+
+.price-readout strong {
+  color: var(--ink-900);
+  font-size: 1rem;
 }
 
 .offer-list {

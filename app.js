@@ -71,7 +71,8 @@
       laborPerUnit: 0,
       included: {},
       selections: {},
-      priceOverrides: {},
+      partQueries: {},
+      cpuVendor: "all",
       partSearch: ""
     }
   };
@@ -83,6 +84,7 @@
   document.addEventListener("click", handleClick);
   document.addEventListener("change", handleChange);
   document.addEventListener("input", handleInput);
+  document.addEventListener("keydown", handleKeydown);
 
   render();
 
@@ -151,6 +153,27 @@
 
     if (event.target.closest("[data-refresh-catalog]")) {
       loadDynamicCatalog(true);
+      return;
+    }
+
+    const cpuVendorButton = event.target.closest("[data-cpu-vendor]");
+    if (cpuVendorButton) {
+      state.build.cpuVendor = cpuVendorButton.dataset.cpuVendor;
+      ensureSelectionForCategory("cpu");
+      reconcileCompatibleSelections("cpu");
+      renderCatalogRows();
+      renderBuildSummary();
+      return;
+    }
+
+    const partChoice = event.target.closest("[data-part-choice]");
+    if (partChoice) {
+      const categoryId = partChoice.dataset.partChoice;
+      state.build.selections[categoryId] = partChoice.dataset.itemId;
+      delete state.build.partQueries[categoryId];
+      reconcileCompatibleSelections(categoryId);
+      renderCatalogRows();
+      renderBuildSummary();
     }
   }
 
@@ -203,16 +226,6 @@
 
     if (target.id === "quantityMode") {
       state.build.quantityMode = target.value;
-      renderBuildSummary();
-      return;
-    }
-
-    if (target.dataset.partSelect) {
-      const categoryId = target.dataset.partSelect;
-      state.build.selections[categoryId] = target.value;
-      delete state.build.priceOverrides[categoryId];
-      reconcileCompatibleSelections(categoryId);
-      renderCatalogRows();
       renderBuildSummary();
       return;
     }
@@ -290,11 +303,22 @@
       return;
     }
 
-    if (target.dataset.priceOverride) {
-      const categoryId = target.dataset.priceOverride;
-      state.build.priceOverrides[categoryId] = Math.max(0, numberFromInput(target.value, 0));
-      renderBuildSummary();
+    if (target.dataset.partQuery) {
+      state.build.partQueries[target.dataset.partQuery] = target.value;
+      filterPartPicker(target);
     }
+  }
+
+  function handleKeydown(event) {
+    const target = event.target;
+    if (!target.dataset?.partQuery || event.key !== "Enter") return;
+
+    const picker = target.closest(".part-picker");
+    const firstVisible = picker?.querySelector(".part-option:not([hidden])");
+    if (!firstVisible) return;
+
+    event.preventDefault();
+    firstVisible.click();
   }
 
   function render() {
@@ -661,7 +685,7 @@
     state.build.profile = profile.id;
     state.build.included = { ...profile.included };
     state.build.selections = { ...profile.selections };
-    state.build.priceOverrides = {};
+    state.build.partQueries = {};
 
     categories.forEach((category) => {
       if (!(category.id in state.build.included)) {
@@ -852,6 +876,16 @@
 
   function getAvailableItemsForCategory(category) {
     const items = category.items || [];
+    if (category.id === "cpu") {
+      if (state.build.cpuVendor === "amd") {
+        return items.filter((item) => item.compatibility?.vendor === "amd");
+      }
+      if (state.build.cpuVendor === "intel") {
+        return items.filter((item) => item.compatibility?.vendor === "intel");
+      }
+      return items;
+    }
+
     if (category.id === "motherboard") {
       const cpuSocket = getSelectedItem("cpu")?.compatibility?.socket;
       if (!cpuSocket) return items;
@@ -889,9 +923,17 @@
       const items = getAvailableItemsForCategory(category);
       if (!items.some((item) => item.id === state.build.selections[categoryId])) {
         state.build.selections[categoryId] = items[0]?.id || null;
-        delete state.build.priceOverrides[categoryId];
       }
     });
+  }
+
+  function ensureSelectionForCategory(categoryId) {
+    const category = categoryById[categoryId];
+    if (!category) return;
+    const items = getAvailableItemsForCategory(category);
+    if (!items.some((item) => item.id === state.build.selections[categoryId])) {
+      state.build.selections[categoryId] = items[0]?.id || null;
+    }
   }
 
   function getAllowedOffers(item) {
@@ -908,9 +950,6 @@
   }
 
   function getSelectedPrice(categoryId) {
-    if (Object.prototype.hasOwnProperty.call(state.build.priceOverrides, categoryId)) {
-      return Number(state.build.priceOverrides[categoryId] || 0);
-    }
     return Number(getBestOffer(getSelectedItem(categoryId))?.price || 0);
   }
 
@@ -936,6 +975,91 @@
     `;
   }
 
+  function renderCpuVendorFilter() {
+    const options = [
+      ["all", "Todos"],
+      ["amd", "Ryzen / AMD"],
+      ["intel", "Intel"]
+    ];
+
+    return `
+      <div class="segmented part-segmented" aria-label="Filtro de processador">
+        ${options.map(([value, label]) => `
+          <button class="${state.build.cpuVendor === value ? "is-active" : ""}" type="button" data-cpu-vendor="${value}">
+            ${escapeHtml(label)}
+          </button>
+        `).join("")}
+      </div>
+    `;
+  }
+
+  function renderPartPicker(category, items, selected) {
+    const query = state.build.partQueries[category.id] ?? selected?.name ?? "";
+    const selectedId = selected?.id || "";
+
+    if (!items.length) {
+      return `
+        ${category.id === "cpu" ? renderCpuVendorFilter() : ""}
+        <div class="part-picker is-empty">
+          <input class="part-search-input" type="search" disabled value="Sem itens compatíveis">
+        </div>
+      `;
+    }
+
+    return `
+      ${category.id === "cpu" ? renderCpuVendorFilter() : ""}
+      <div class="part-picker" data-picker="${category.id}">
+        <input
+          class="part-search-input"
+          type="search"
+          data-part-query="${category.id}"
+          value="${escapeAttr(query)}"
+          placeholder="Digite para buscar ${escapeAttr(category.label.toLowerCase())}"
+          autocomplete="off"
+        >
+        <div class="part-picker-count" data-picker-count="${category.id}">${formatNumber(items.length)} opções disponíveis</div>
+        <div class="part-option-list" role="listbox">
+          ${items.map((item) => {
+            const offer = getBestOffer(item);
+            return `
+              <button
+                class="part-option ${item.id === selectedId ? "is-selected" : ""}"
+                type="button"
+                data-part-choice="${category.id}"
+                data-item-id="${escapeAttr(item.id)}"
+                data-search="${escapeAttr(normalize(item.name))}"
+              >
+                <span>${escapeHtml(item.name)}</span>
+                <small>${offer ? `${formatCurrency(offer.price)} - ${escapeHtml(offer.supplierLabel)}` : "Sem preço público"}</small>
+              </button>
+            `;
+          }).join("")}
+        </div>
+      </div>
+    `;
+  }
+
+  function filterPartPicker(input) {
+    const picker = input.closest(".part-picker");
+    if (!picker) return;
+
+    const terms = normalize(input.value).split(/\s+/).filter(Boolean);
+    const options = [...picker.querySelectorAll(".part-option")];
+    let visible = 0;
+
+    options.forEach((option) => {
+      const search = option.dataset.search || "";
+      const matches = terms.every((term) => search.includes(term));
+      option.hidden = !matches;
+      if (matches) visible += 1;
+    });
+
+    const counter = picker.querySelector("[data-picker-count]");
+    if (counter) {
+      counter.textContent = `${formatNumber(visible)} de ${formatNumber(options.length)} opções`;
+    }
+  }
+
   function catalogRow(category) {
     const availableItems = getAvailableItemsForCategory(category);
     const selected = getSelectedItem(category.id);
@@ -954,13 +1078,13 @@
           </label>
         </td>
         <td>
-          <select data-part-select="${category.id}">
-            ${availableItems.map((item) => `<option value="${item.id}" ${item.id === selected?.id ? "selected" : ""}>${escapeHtml(item.name)}</option>`).join("")}
-          </select>
+          ${renderPartPicker(category, availableItems, selected)}
         </td>
         <td>
-          <input class="price-input" type="number" min="0" step="0.01" data-price-override="${category.id}" value="${price}">
-          <small>${bestOffer ? `Menor preço: ${escapeHtml(bestOffer.supplierLabel)}` : "Sem preço público na whitelist"}</small>
+          <div class="price-readout">
+            <strong>${price ? formatCurrency(price) : "-"}</strong>
+            <small>${bestOffer ? `Menor preço: ${escapeHtml(bestOffer.supplierLabel)}` : "Sem preço público"}</small>
+          </div>
         </td>
         <td>
           ${renderOffers(offers)}
