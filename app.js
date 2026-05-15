@@ -237,6 +237,16 @@
       return;
     }
 
+    if (target.id === "minWindows") {
+      state.minimum.windowsMajor = numberFromInput(target.value, 0);
+      state.minimumProfile = "custom";
+      state.page = 1;
+      syncMinimumLabels();
+      renderInventoryResults();
+      renderBuildSummary();
+      return;
+    }
+
     if (target.id === "buildProfile") {
       applyBuildProfile(target.value);
       renderBuilderView();
@@ -280,16 +290,6 @@
 
     if (target.id === "minCpu") {
       state.minimum.cpuMhz = numberFromInput(target.value, 0);
-      state.minimumProfile = "custom";
-      state.page = 1;
-      syncMinimumLabels();
-      renderInventoryResults();
-      renderBuildSummary();
-      return;
-    }
-
-    if (target.id === "minWindows") {
-      state.minimum.windowsMajor = numberFromInput(target.value, 0);
       state.minimumProfile = "custom";
       state.page = 1;
       syncMinimumLabels();
@@ -424,7 +424,11 @@
               </label>
               <label class="field">
                 <span>Windows mínimo</span>
-                <input id="minWindows" type="number" min="0" step="1" value="${state.minimum.windowsMajor}">
+                <select id="minWindows">
+                  ${windowsMinimumOptions().map((option) => `
+                    <option value="${option.value}" ${Number(option.value) === Number(state.minimum.windowsMajor) ? "selected" : ""}>${escapeHtml(option.label)}</option>
+                  `).join("")}
+                </select>
               </label>
             </div>
 
@@ -1403,6 +1407,24 @@
 
   function getOsOptions() {
     return [...new Set(rows.map((row) => row.sistemaOperacional).filter(Boolean))].sort((a, b) => a.localeCompare(b, "pt-BR"));
+  }
+
+  function windowsMinimumOptions() {
+    const versions = new Set([7, 8, 8.1, 10, 11]);
+    rows.forEach((row) => {
+      const version = getWindowsMajor(row.sistemaOperacional);
+      if (version > 0) versions.add(version);
+    });
+
+    return [
+      { value: 0, label: "Sem corte de Windows" },
+      ...[...versions]
+        .sort((a, b) => a - b)
+        .map((version) => ({
+          value: version,
+          label: `Windows ${version} ou superior`
+        }))
+    ];
   }
 
   function getWindowsMajor(os) {

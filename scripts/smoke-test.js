@@ -81,6 +81,14 @@ if (!statsHtml.includes("Computadores únicos")) {
   throw new Error("Stats grid was not rendered.");
 }
 
+if (!appHtml.includes('<select id="minWindows"') || !appHtml.includes("Windows 11")) {
+  throw new Error("Windows minimum selector was not rendered.");
+}
+
+if (appHtml.includes('id="minWindows" type="number"')) {
+  throw new Error("Windows minimum should not be a numeric input.");
+}
+
 if (!resultsHtml.includes("32603_lab01")) {
   throw new Error("Inventory table did not render expected workbook data.");
 }
