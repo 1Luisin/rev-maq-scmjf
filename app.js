@@ -35,7 +35,7 @@
     },
     {
       id: "recommended",
-      label: "Padrão Santa Casa recomendado",
+      label: "Recomendado",
       ramGb: 16,
       cpuMhz: 3000,
       windowsMajor: 11
@@ -519,7 +519,7 @@
     state.page = Math.min(state.page, totalPages);
     const start = (state.page - 1) * state.pageSize;
     const pageItems = evaluated.slice(start, start + state.pageSize);
-    const stats = getInventoryStats();
+    const filteredStats = summarizeEvaluatedRows(evaluated);
 
     container.innerHTML = `
       <div class="result-toolbar">
@@ -528,9 +528,9 @@
           <h2>${formatNumber(evaluated.length)} máquinas</h2>
         </div>
         <div class="pill-row">
-          <span class="pill danger">${formatNumber(stats.belowMinimum)} abaixo do mínimo</span>
-          <span class="pill amber">${formatNumber(stats.oldWindows)} com Windows antigo</span>
-          <span class="pill green">${formatNumber(stats.meetsMinimum)} no mínimo</span>
+          <span class="pill danger">${formatNumber(filteredStats.belowMinimum)} abaixo do mínimo</span>
+          <span class="pill amber">${formatNumber(filteredStats.oldWindows)} com Windows antigo</span>
+          <span class="pill green">${formatNumber(filteredStats.meetsMinimum)} no mínimo</span>
         </div>
       </div>
 
@@ -766,23 +766,35 @@
 
   function getInventoryStats() {
     const evaluated = rows.map((row) => ({ row, evaluation: evaluateHardware(row) }));
-    const workstations = evaluated.filter(({ row }) => !isServer(row));
-    const belowMinimum = workstations.filter(({ evaluation }) => !evaluation.meets);
-    const oldWindows = workstations.filter(({ row }) => {
-      const major = getWindowsMajor(row.sistemaOperacional);
-      return major > 0 && major < 10;
-    });
+    const summary = summarizeEvaluatedRows(evaluated);
+    const workstations = summary.workstations;
 
     return {
       total: rows.length,
       workstations: workstations.length,
       servers: rows.length - workstations.length,
-      belowMinimum: belowMinimum.length,
-      meetsMinimum: workstations.length - belowMinimum.length,
-      oldWindows: oldWindows.length,
+      belowMinimum: summary.belowMinimum,
+      meetsMinimum: summary.meetsMinimum,
+      oldWindows: summary.oldWindows,
       immediate: workstations.filter(({ row }) => row.prioridade === "Troca imediata").length,
       recommendedAdditional: workstations.filter(({ row }) => row.prioridade === "Troca recomendada").length,
       outsideCut: workstations.filter(({ row }) => row.prioridade === "Manter / avaliar futuramente").length
+    };
+  }
+
+  function summarizeEvaluatedRows(evaluated) {
+    const workstations = evaluated.filter(({ row }) => !isServer(row));
+    const belowMinimum = workstations.filter(({ evaluation }) => !evaluation.meets).length;
+    const oldWindows = workstations.filter(({ row }) => {
+      const major = getWindowsMajor(row.sistemaOperacional);
+      return major > 0 && major < 10;
+    }).length;
+
+    return {
+      workstations,
+      belowMinimum,
+      meetsMinimum: workstations.length - belowMinimum,
+      oldWindows
     };
   }
 
@@ -1338,18 +1350,12 @@
   }
 
   function getFilteredStatusDistribution(items) {
-    const workstations = items.filter(({ row }) => !isServer(row));
-    const belowMinimum = workstations.filter(({ evaluation }) => !evaluation.meets).length;
-    const meetsMinimum = workstations.length - belowMinimum;
-    const oldWindows = workstations.filter(({ row }) => {
-      const major = getWindowsMajor(row.sistemaOperacional);
-      return major > 0 && major < 10;
-    }).length;
+    const summary = summarizeEvaluatedRows(items);
 
     return [
-      { label: "Abaixo do mínimo", quantity: belowMinimum },
-      { label: "No mínimo", quantity: meetsMinimum },
-      { label: "Com Windows antigo", quantity: oldWindows }
+      { label: "Abaixo do mínimo", quantity: summary.belowMinimum },
+      { label: "No mínimo", quantity: summary.meetsMinimum },
+      { label: "Com Windows antigo", quantity: summary.oldWindows }
     ];
   }
 

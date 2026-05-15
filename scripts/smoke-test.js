@@ -129,6 +129,11 @@ if (elements.get("#inventoryResults").innerHTML.includes('sort-button is-active"
   throw new Error("Sort cycle should reset to the default state after ascending and descending.");
 }
 
+handlers.change({ target: { id: "osFilter", value: "Microsoft Windows 11 Pro" } });
+if (!elements.get("#inventoryResults").innerHTML.includes("0 com Windows antigo")) {
+  throw new Error("Result toolbar counters should follow the active filters.");
+}
+
 handlers.click({
   target: {
     closest(selector) {
