@@ -130,8 +130,14 @@ if (elements.get("#inventoryResults").innerHTML.includes('sort-button is-active"
 }
 
 handlers.change({ target: { id: "osFilter", value: "Microsoft Windows 11 Pro" } });
-if (!elements.get("#inventoryResults").innerHTML.includes("0 com Windows antigo")) {
+if (!elements.get("#inventoryResults").innerHTML.includes("0 com Windows abaixo do mínimo")) {
   throw new Error("Result toolbar counters should follow the active filters.");
+}
+
+handlers.change({ target: { id: "osFilter", value: "all" } });
+handlers.change({ target: { id: "minWindows", value: "11" } });
+if (!elements.get("#inventoryResults").innerHTML.includes("739 com Windows abaixo do mínimo")) {
+  throw new Error("Windows counter should follow the selected minimum Windows version.");
 }
 
 handlers.click({

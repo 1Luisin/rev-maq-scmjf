@@ -529,7 +529,7 @@
         </div>
         <div class="pill-row">
           <span class="pill danger">${formatNumber(filteredStats.belowMinimum)} abaixo do mínimo</span>
-          <span class="pill amber">${formatNumber(filteredStats.oldWindows)} com Windows antigo</span>
+          <span class="pill amber">${formatNumber(filteredStats.oldWindows)} com Windows abaixo do mínimo</span>
           <span class="pill green">${formatNumber(filteredStats.meetsMinimum)} no mínimo</span>
         </div>
       </div>
@@ -785,10 +785,7 @@
   function summarizeEvaluatedRows(evaluated) {
     const workstations = evaluated.filter(({ row }) => !isServer(row));
     const belowMinimum = workstations.filter(({ evaluation }) => !evaluation.meets).length;
-    const oldWindows = workstations.filter(({ row }) => {
-      const major = getWindowsMajor(row.sistemaOperacional);
-      return major > 0 && major < 10;
-    }).length;
+    const oldWindows = workstations.filter(({ row }) => isWindowsBelowMinimum(row)).length;
 
     return {
       workstations,
@@ -837,7 +834,7 @@
           case "servers":
             return isServer(row);
           case "old-os":
-            return getWindowsMajor(row.sistemaOperacional) > 0 && getWindowsMajor(row.sistemaOperacional) < 10;
+            return isWindowsBelowMinimum(row);
           case "low-ram":
             return Number(row.ramGb || 0) < 4;
           default:
@@ -1280,7 +1277,7 @@
       { value: "recommended", label: "Selecionados na planilha" },
       { value: "recommended-additional", label: "Recomendada adicional" },
       { value: "keep", label: "Manter / avaliar" },
-      { value: "old-os", label: "Windows abaixo do 10" },
+      { value: "old-os", label: "Windows abaixo do mínimo" },
       { value: "low-ram", label: "RAM abaixo de 4 GB" },
       { value: "servers", label: "Servidores" }
     ];
@@ -1355,7 +1352,7 @@
     return [
       { label: "Abaixo do mínimo", quantity: summary.belowMinimum },
       { label: "No mínimo", quantity: summary.meetsMinimum },
-      { label: "Com Windows antigo", quantity: summary.oldWindows }
+      { label: "Com Windows abaixo do mínimo", quantity: summary.oldWindows }
     ];
   }
 
@@ -1443,6 +1440,12 @@
     if (text.includes("windows 7")) return 7;
     if (text.includes("windows server")) return 0;
     return 0;
+  }
+
+  function isWindowsBelowMinimum(row) {
+    const major = getWindowsMajor(row.sistemaOperacional);
+    const minimum = Number(state.minimum.windowsMajor || 0);
+    return major > 0 && minimum > 0 && major < minimum;
   }
 
   function isServer(row) {
