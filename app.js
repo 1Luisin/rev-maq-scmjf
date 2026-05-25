@@ -1158,6 +1158,10 @@
           placeholder="Digite para buscar ${escapeAttr(category.label.toLowerCase())}"
           autocomplete="off"
         >
+        <div class="selected-part">
+          <span>Selecionado</span>
+          <strong>${escapeHtml(selected?.name || "Nenhuma peça selecionada")}</strong>
+        </div>
         <div class="part-picker-count" data-picker-count="${category.id}">${formatNumber(visibleItems.length)} de ${formatNumber(items.length)} opções</div>
         <div class="part-option-list" role="listbox">
           ${items.map((item) => {

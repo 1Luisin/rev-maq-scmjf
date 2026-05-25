@@ -164,6 +164,10 @@ if (!elements.get("#catalogRows").innerHTML.includes("part-search-input")) {
   throw new Error("Searchable part picker was not rendered.");
 }
 
+if (!elements.get("#catalogRows").innerHTML.includes("selected-part")) {
+  throw new Error("Selected part summary was not rendered.");
+}
+
 if (elements.get("#catalogRows").innerHTML.includes("data-price-override")) {
   throw new Error("Editable price override should not be rendered.");
 }
